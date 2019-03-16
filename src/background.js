@@ -1,6 +1,7 @@
+/* jshint node: true */
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, systemPreferences } from 'electron'
 import {
   createProtocol,
   installVueDevtools
@@ -15,12 +16,19 @@ let win
 protocol.registerStandardSchemes(['app'], { secure: true })
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({ width: 800, height: 600 })
+  win = new BrowserWindow({
+    width: 360, // 450
+    height: 440, // 350
+    minWidth: 300,
+    minHeight: 300,
+    titleBarStyle: "hiddenInset",
+    opacity: 0.98
+  })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    // if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
@@ -56,12 +64,12 @@ app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
-      await installVueDevtools()
+      await installVueDevtools();
     } catch (e) {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-  createWindow()
+  createWindow();
 })
 
 // Exit cleanly on request from parent process in development mode.
@@ -78,3 +86,15 @@ if (isDevelopment) {
     })
   }
 }
+
+const theThemeHasChanged = () => {
+  console.log("theme", systemPreferences.isDarkMode());
+  //updateMyAppTheme(systemPreferences.isDarkMode())
+}
+
+systemPreferences.subscribeNotification(
+  'AppleInterfaceThemeChangedNotification', 
+  theThemeHasChanged
+);
+
+theThemeHasChanged();
