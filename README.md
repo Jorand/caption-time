@@ -30,3 +30,6 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### TODO
 1. use - https://github.com/gielcobben/caption-core
+
+### Resources
+- Dark theme electron (https://medium.com/missive-app/make-your-electron-app-dark-mode-compatible-c23dcfdd0dfa)

@@ -87,14 +87,19 @@ if (isDevelopment) {
   }
 }
 
-const theThemeHasChanged = () => {
-  console.log("theme", systemPreferences.isDarkMode());
-  //updateMyAppTheme(systemPreferences.isDarkMode())
+if (process.platform == 'darwin') {
+  
+  const setTheme = () => {
+    let theme = systemPreferences.isDarkMode() ? 'dark' : 'light';
+    
+    console.log("theme :", theme);
+    //updateMyAppTheme(systemPreferences.isDarkMode())
+  }
+
+  systemPreferences.subscribeNotification(
+    'AppleInterfaceThemeChangedNotification', 
+    setTheme
+  );
+
+  setTheme();
 }
-
-systemPreferences.subscribeNotification(
-  'AppleInterfaceThemeChangedNotification', 
-  theThemeHasChanged
-);
-
-theThemeHasChanged();
