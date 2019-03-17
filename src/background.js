@@ -22,7 +22,7 @@ function createWindow () {
     minWidth: 300,
     minHeight: 300,
     titleBarStyle: "hiddenInset",
-    opacity: 0.98
+    opacity: 1 //0.98
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

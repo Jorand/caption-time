@@ -23,6 +23,8 @@
     "start": "npm run electron:serve"
   },
   "dependencies": {
+    "axios": "^0.18.0",
+    "caption-core": "^2.1.1",
     "rimraf": "^2.6.3",
     "vue": "^2.6.6",
     "vue-router": "^3.0.1",
