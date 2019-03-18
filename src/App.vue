@@ -1,23 +1,26 @@
 <template>
-  <div id="app" :data-theme="theme">
-    <TitleBar />
-    <div class="app-content">
-      <div id="nav">
+  <div id="app" class="flex-container" :data-theme="theme">
+    <TheTitleBar />
+    <div class="app-content flex-content">
+      <!-- <div id="nav">
         <router-link to="/">Home</router-link> |
         <router-link to="/about">About</router-link>
-      </div>
+      </div> -->
       <router-view/>
     </div>
+    <TheFooterBar />
   </div>
 </template>
 
 <script>
-import TitleBar from '@/components/TitleBar.vue'
+import TheTitleBar from '@/components/TheTitleBar.vue'
+import TheFooterBar from '@/components/TheFooterBar.vue'
 
 export default {
   name: 'app',
   components: {
-    TitleBar
+    TheTitleBar,
+    TheFooterBar
   },
   data() {
     return {
@@ -42,7 +45,15 @@ export default {
     color: #000;
   }
   
-  .app-content {
+  .flex-container {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+    flex-direction: column;
+  }
+  
+  .flex-content {
+    flex: 1; /* takes the remaining height of the "container" div */
     overflow: auto;
   }
   

@@ -8,7 +8,7 @@
 import electron from 'electron'
 
 export default {
-  name: "TitleBar",
+  name: "TheTitleBar",
   data() {
     return {
       appName: electron.remote.app.getName(),
@@ -26,6 +26,7 @@ export default {
     cursor: default;
     border-radius: 6px 6px 0 0;
     flex: none;
+    text-align: center;
     
     .title {
       width: 100%;
