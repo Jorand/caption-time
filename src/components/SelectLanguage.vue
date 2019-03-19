@@ -2,7 +2,7 @@
   <div class="select-container">
       <button class="select-button">{{ userLanguageName }}</button>
       <select class="input-select" v-model="selectedValue" @change="setUserLanguage($event.target.value)">
-        <option v-for="lang in languages" 
+        <option v-for="lang in languages"
           :key="lang.code"
           :value="lang.code">
           {{ lang.name }}
@@ -20,14 +20,14 @@ export default {
   data () {
     return {
       languages: Languages,
-      selectedValue: ""
+      selectedValue: ''
     }
   },
-  mounted() {
+  mounted () {
     this.selectedValue = this.userLanguageCode
   },
   methods: {
-    setUserLanguage(val) {
+    setUserLanguage (val) {
       this.$store.commit('setUserLanguage', this.selectedValue)
     }
   },
@@ -75,8 +75,9 @@ export default {
     }
 
     .input-select {
-      position: absolute;
+      //background-color: red;
       opacity: 0;
+      position: absolute;
       left: 0;
       font-size: 13px;
       border: 0;
@@ -84,7 +85,6 @@ export default {
       background: transparent;
       box-shadow: none;
       padding: 4px 0 0 10px;
-      //background-color: red;
       width: 100%;
     }
   }
