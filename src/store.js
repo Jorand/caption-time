@@ -27,6 +27,7 @@ export default new Vuex.Store({
     setUserLanguage: (state, code) => {
       state.userSettings.language = code
       localStorage.setItem('user-language', state.userSettings.language)
+      console.log("[INFO] User Language saved: ", Languages.find(l => l.code === state.userSettings.language).name);
     }
   },
   actions: {
