@@ -1,4 +1,5 @@
-const axios = require('axios')
+import axios from 'axios'
+import tnp from 'torrent-name-parser'
 
 export default function ({
   username = 'popcorn',
@@ -69,6 +70,37 @@ export default function ({
         this.connected()
       }
     }
+  }
+
+  this.paseTitle = (rawTitle) => {
+    console.log('[INFO] Parser In:', rawTitle)
+    // Clean title to extract Titre Saison Episode …
+    var titleTpn = rawTitle
+      // .replace(/ - /g, ' ')
+      .replace(/,/g, '')
+      .replace(/Season |Saison /g, 'S')
+      .replace(/Episode |Épisode /g, 'E')
+      .replace(/&amp;/g, '')
+
+    var regexp = new RegExp(/([S|E])([0-9]+)/, 'ig')
+
+    var self = this
+    titleTpn = titleTpn.replace(regexp,
+      function (match, p1, p2, p3, offset, string) {
+        return p1 + '' + self.pad(p2)
+      })
+
+    if (!regexp.test(titleTpn)) {
+      titleTpn += ' -Film'
+    }
+
+    console.log('[INFO] Parser Out:', titleTpn)
+
+    return tnp(titleTpn)
+  }
+
+  this.pad = (n) => {
+    return (n < 10) ? ('0' + n) : n
   }
 
   this.disconnect = () => {

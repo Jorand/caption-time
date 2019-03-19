@@ -44,7 +44,7 @@ export default {
       padding: 11px 5px;
       font-size: 14px;
       font-weight: 400;
-      color: rgba(0, 0, 0, 0.4);
+      color: $grey-color;
       white-space: nowrap;
     }
 

@@ -8,29 +8,29 @@
 import electron from 'electron'
 
 export default {
-  name: "TheFooterBar",
-  data() {
+  name: 'TheFooterBar',
+  data () {
     return {
-      appVersion : electron.remote.app.getVersion()
-    };
+      appVersion: electron.remote.app.getVersion()
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
   .footer-bar {
-    height: 38px;
+    height: 34px;
     border-radius: 0 0 6px 6px;
     text-align: center;
-    //border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid $lightgrey-color;
     text-align: right;
-    
+
     .app-version {
       margin: 0;
       padding: 0;
-      line-height: 38px;
+      line-height: 34px;
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.4);
+      color: $grey-color;
       margin-right: 15px;
     }
   }

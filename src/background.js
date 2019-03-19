@@ -17,8 +17,8 @@ protocol.registerStandardSchemes(['app'], { secure: true })
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 360, // 450
-    height: 440, // 350
+    width: 390, // 450
+    height: 480, // 350
     minWidth: 350,
     minHeight: 350,
     titleBarStyle: "hiddenInset",
@@ -88,16 +88,16 @@ if (isDevelopment) {
 }
 
 if (process.platform == 'darwin') {
-  
+
   const setTheme = () => {
     let theme = systemPreferences.isDarkMode() ? 'dark' : 'light';
-    
+
     console.log("theme :", theme);
     //updateMyAppTheme(systemPreferences.isDarkMode())
   }
 
   systemPreferences.subscribeNotification(
-    'AppleInterfaceThemeChangedNotification', 
+    'AppleInterfaceThemeChangedNotification',
     setTheme
   );
 
