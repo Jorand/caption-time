@@ -1,14 +1,25 @@
 <template>
   <div class="search">
-    <form @submit="searchSubtitles" class="search-container">
-      <input autofocus type="text" name="searchQuery" class="search-input"
-      placeholder="Game of Thrones S01E01 /eng …"
-      v-model="searchQuery"
-      @focus="show_info = true"
-      @blur="show_info = false">
-      <input type="submit" value="submit" class="search-btn">
-      <span class="tips" v-show="show_info">Tips: /eng or /english override your default language.</span>
+    <form @submit="searchSubtitles" class="search-form">
+      <input autofocus type="text" placeholder="Enter show or movie name…"
+      name="search-input" class="search-input" ref="searchInput"
+      v-model="query"
+      @keydown.down="onArrowDown"
+      @keydown.up="onArrowUp"
+      @keydown.enter="onEnter" />
+      <i class="icon-search"></i>
+      <button type="reset" name="reset" value="Reset" class="search-reset icon-cross"
+        @click.stop="reset">
+      </button>
     </form>
+    <div class="event-toast">
+      <div class="loader" v-if="isLoading">
+        Searching…
+      </div>
+      <div class="nothing" v-if="nothingFound">
+        Nothing found !
+      </div>
+    </div>
   </div>
 </template>
 
@@ -16,63 +27,136 @@
 import Caption from 'caption-core'
 import Languages from '@/lib/languages'
 
-function searchLangInQuery (query) {
-  var languagesString = Languages.map(e => e.name).join('|/') + '|/' + Languages.map(e => e.code).join('|/')
-  var regex = new RegExp(`(/${languagesString})$`, 'gi')
-  var found = query.match(regex)
-
-  if (found) {
-    found = found[0].toLowerCase().replace('/', '')
-    var language = Languages.find(l => l.name.toLowerCase() === found) || Languages.find(l => l.code === found)
-    console.log('[INFO] Query match language:', found, language.name)
-    return language.code
-  }
-}
+// Number of subtitles returned.
+// Option: int|"all"|"best"
+const LIMIT = 10
 
 export default {
   name: 'SearchInput',
-  props: ['query'],
+  props: ['remoteQuery'],
   data () {
     return {
-      searchQuery: '',
+      query: '',
+      lastQuery: '',
+      isLoading: false,
       searchResult: [],
-      show_info: false
+      arrowNavPosition: -1,
+      nothingFound: false
     }
   },
   methods: {
-    searchSubtitles (e) {
-      if (e) e.preventDefault()
-      // Search Logic
-      if (!this.searchQuery) {
-        return
+    searchLangInQuery (q) {
+      // Look in the Query for /[lang|code]
+      // Override user setting
+      var langStr = Languages.map(e => e.name).join('|/') + '|/' + Languages.map(e => e.code).join('|/')
+      var match = q.match(new RegExp(`(/${langStr})$`, 'gi'))
+
+      if (match) {
+        match = match[0].toLowerCase().replace('/', '') // Remove /
+        var language = Languages.find(l => l.name.toLowerCase() === match) || Languages.find(l => l.code === match)
+        console.log('[INFO] Query match language:', match, language.name)
+        return language.code
       }
+    },
+    updateSubtitles (subtitles) {
+      this.$emit('search-result', subtitles)
+    },
+    searchSubtitles (e) {
+      if (e) e.preventDefault() // Prevent form submit
+      if (!this.query) return // Do nothing empty query
 
-      const LIMIT = 10 // "all" "best"
-      var LANG = searchLangInQuery(this.searchQuery) || this.$store.state.userSettings.language
+      console.log('[INFO] searchByQuery:', this.query)
+      this.startLoader()
+      this.arrowNavPosition = -1
+      this.searchResult = []
+      this.lastQuery = this.query
+      this.nothingFound = false
 
-      Caption.searchByQuery(this.searchQuery, LANG, LIMIT)
+      // Use language in query or stored user setting language
+      var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.language
+
+      Caption.searchByQuery(this.query, LANG, LIMIT)
         .on('fastest', subtitles => {
           // Fastest source has been checked.
           console.log('[INFO] Fastest search result:', subtitles)
-          this.searchResult = subtitles
-          this.$emit('search-result', this.searchResult)
+          // this.searchResult = subtitles
         })
         .on('completed', subtitles => {
           // All sources are checked.
+          // add lang to subtitle object
+          subtitles = subtitles.filter(function (item) {
+            item.langCode = LANG
+            item.lang = item.subInfo ? item.subInfo.lang : ''
+            item.langName = item.lang ? item.lang : Languages.find(l => l.code === LANG).name
+            item.lang = item.subInfo ? item.subInfo.lang : ''
+            item.langId = item.subInfo ? item.subInfo.langId : ''
+            item.downloads = item.subInfo ? item.subInfo.downloads : ''
+            item.distribution = item.subInfo ? item.subInfo.distribution : ''
+            item.team = item.subInfo ? item.subInfo.team : ''
+            item.version = item.subInfo ? item.subInfo.version : ''
+            item.episodeTitle = item.subInfo ? item.subInfo.episodeTitle : ''
+            item.hearingImpaired = item.subInfo ? item.subInfo.hearingImpaired : ''
+            return item
+          })
           console.log('[INFO] Completed search result:', subtitles)
+          this.endLoader()
           this.searchResult = subtitles
-          this.$emit('search-result', this.searchResult)
+          this.nothingFound = this.searchResult.length < 1
         })
+    },
+    reset () {
+      this.lastQuery = this.query = ''
+      this.nothingFound = false
+      this.searchResult = []
+      this.$refs.searchInput.focus()
+    },
+    startLoader () {
+      this.isLoading = true
+    },
+    endLoader () {
+      this.isLoading = false
+    },
+    onArrowDown (event) {
+      event.preventDefault()
+      if (this.arrowNavPosition < this.searchResult.length - 1 && this.searchResult.length) {
+        this.arrowNavPosition++
+      }
+    },
+    onArrowUp (event) {
+      event.preventDefault()
+      if (this.arrowNavPosition > 0) {
+        this.arrowNavPosition--
+      }
+    },
+    onEnter (event) {
+      event.preventDefault()
+      // If query hase change: Send Query
+      // console.log(this.query, this.lastQuery)
+      if (this.query === '') {
+        this.reset()
+      } else if (this.query !== this.lastQuery) {
+        this.searchSubtitles()
+      }
+      // console.log('[INFO] On Enter')
+      this.$emit('arrow-enter', Date.now())
     }
   },
   computed: {},
   watch: {
-    query: function (newVal, oldVal) { // watch it
-      console.log('[INFO] Prop changed:', newVal, '| was:', oldVal)
-      if (newVal && newVal !== this.searchQuery) {
-        this.searchQuery = newVal
+    searchResult: function (newVal, oldVal) {
+      // console.log('[WATCH] Search result:', newVal, '| was:', oldVal)
+      this.updateSubtitles(this.searchResult)
+    },
+    remoteQuery: function (newVal, oldVal) { // watch it
+      console.log('[WATCH] Remote query:', newVal, '| was:', oldVal)
+      if (newVal && newVal !== this.query) {
+        this.query = newVal
         this.searchSubtitles()
       }
+    },
+    arrowNavPosition: function (newVal, oldVal) {
+      // console.log('[WATCH] ArrowNav position:', newVal, '| was:', oldVal)
+      this.$emit('arrow-navigation', this.arrowNavPosition)
     }
   }
 }
@@ -80,51 +164,11 @@ export default {
 
 <style lang="scss" scoped>
   .search {
+    position: relative;
     padding: 12px 25px;
 
-    .tips {
-      position: absolute;
-      font-size: 11px;
-      line-height: 1em;
-      color: $grey-color;
-      display: inline-block;
-      top: 100%;
-      left: 0;
-      right: 0;
-      margin-top: 3px;
-      display: none;
-    }
-
-    .search-container {
+    .search-form {
       position: relative;
-
-      &::after {
-        content: '';
-        display: block;
-        position: absolute;
-        top: 9px;
-        left: 10px;
-        width: 15px;
-        height: 15px;
-        border: 2px solid $grey-color;
-        border-radius: 50%;
-        background-color: white;
-        pointer-events: none;
-      }
-
-      &::before {
-        content: '';
-        display: block;
-        position: absolute;
-        top: 15px; // +6
-        left: 15px;
-        width: 2px;
-        height: 17px;
-        background-color: $grey-color;
-        transform: rotate(-45deg);
-        transform-origin: top left;
-        pointer-events: none;
-      }
     }
 
     .search-input {
@@ -134,15 +178,14 @@ export default {
       height: 36px;
       line-height: 36px;
       width: 100%;
-      padding: 0 10px;
-      padding-left: 35px;
+      padding: 0 25px 0 35px;
 
       &::placeholder {
         color: $grey-color
       }
     }
 
-    .search-btn {
+    .icon-search {
       position: absolute;
       top: 0px;
       left: 0px;
@@ -151,7 +194,34 @@ export default {
       height: 36px;
       border: none;
       background: transparent;
-      opacity: 0;
+      overflow: hidden;
+      text-indent: 200%;
+      white-space: nowrap;
+      color: $grey-color;
+    }
+
+    .search-reset {
+      position: absolute;
+      top: 50%;
+      right: 7px;
+      width: 20px;
+      height: 20px;
+      margin-top: -10px;
+      border: none;
+      color: $grey-color;
+
+      &:hover, &:focus {
+        color: black;
+      }
+    }
+
+    .event-toast {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      padding: 5px 25px;
+      font-size: 14px;
     }
   }
 </style>

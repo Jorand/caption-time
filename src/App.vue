@@ -22,9 +22,9 @@ export default {
     TheTitleBar,
     TheFooterBar
   },
-  data() {
+  data () {
     return {
-      theme: "dark"
+      theme: 'dark'
     }
   }
 }
@@ -44,19 +44,19 @@ export default {
     background-color: #fff; // #303133, #1c1e23
     color: #000;
   }
-  
+
   .flex-container {
     display: flex;
     height: 100%;
     overflow: hidden;
     flex-direction: column;
   }
-  
+
   .flex-content {
     flex: 1; /* takes the remaining height of the "container" div */
     overflow: auto;
   }
-  
+
   #nav {
     padding: 30px;
     a {
@@ -66,5 +66,9 @@ export default {
         color: #42b983;
       }
     }
+  }
+
+  :focus {
+    border-color: $accent-color;
   }
 </style>

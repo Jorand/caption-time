@@ -86,6 +86,7 @@ export default {
                 data.query += ' S' + Butter.pad(show.season) + ' E' + Butter.pad(show.episode) + (show.quality ? ' ' + show.quality : '')
               }
               this.butterCurrentShow = data
+              this.isActive = true
               console.info('[INFO] Emit:', data.query)
               this.$emit('title-playing', data.query)
             }
@@ -115,20 +116,20 @@ export default {
     cursor: pointer;
     position: relative;
     margin: 0 13px;
-    margin-top: -5px;
-    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 5px;
     height: 25px;
     background-color: $accent-color;
     border-radius: 5px;
-    padding: 2px 15px;
+    padding: 2px 15px 0;
     padding-bottom: 10px;
     overflow: hidden;
     transition: .2s;
     z-index: 1;
 
     &.active {
-      margin-top: -60px;
-      height: 80px;
+      margin-bottom: -60px;
+      height: 90px;
     }
 
     .player {

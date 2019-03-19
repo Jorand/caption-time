@@ -1,0 +1,58 @@
+.icon-cross {
+  font-size: 10px;
+  position: relative;
+
+  &::after, &::before {
+    content: '';
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    width: 1.1em;
+    height: 0em;
+    margin-top: -.1em;
+    margin-left: -.55em;
+    border-bottom: .1em solid;
+    color: inherit;
+  }
+
+  &::after {
+    transform: rotate(45deg);
+  }
+
+  &::before {
+    transform: rotate(-45deg);
+  }
+}
+
+.icon-search {
+  font-size: 10px;
+  position: relative;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: .9em;
+    left: 1em;
+    width: 1.5em;
+    height: 1.5em;
+    border: .2em solid;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 2.2em; // +6
+    left: 2.2em;
+    width: 0em;
+    height: .7em;
+    transform: rotate(-45deg);
+    transform-origin: top left;
+    pointer-events: none;
+    border-right: .2em solid;
+  }
+}

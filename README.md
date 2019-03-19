@@ -6,6 +6,7 @@ This is a new version inspired by [Caption](https://github.com/gielcobben/captio
 
 I'm using the great package [Caption Core](https://github.com/gielcobben/caption-core) to get the subtitles.
 
+Tips: /eng or /english override your default language.
 
 ## Install
 

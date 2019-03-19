@@ -1,11 +1,16 @@
 <template>
   <div class="home flex-container">
-    <SearchInput
-      v-on:search-result="updateList"
-      v-bind:query="externalQuery" />
     <ButterPlaying v-on:title-playing="searchFromButter" />
-    <div class="flex-content">
-      <Subtitles v-bind:subtitles="subtitleList" />
+    <SearchInput
+      v-on:search-result="updateSubtitles"
+      v-on:arrow-navigation="updatePosition"
+      v-on:arrow-enter="enter"
+      v-bind:remoteQuery="externalQuery" />
+    <div class="flex-content" ref="container">
+      <Subtitles
+        v-bind:subtitles="subtitlesList"
+        v-bind:arrowNavPosition="arrowNavPosition"
+        v-bind:arrowNavEnter="arrowNavEnter" />
     </div>
   </div>
 </template>
@@ -24,18 +29,26 @@ export default {
   },
   data () {
     return {
-      subtitleList: [],
-      externalQuery: ''
+      subtitlesList: [],
+      externalQuery: '',
+      arrowNavPosition: -1,
+      arrowNavEnter: 0
     }
   },
   methods: {
-    updateList (result) {
+    updateSubtitles (subtitles) {
       // const { title, id } = result
       // this.subtitles = [...this.subtitles, result];
-      this.subtitleList = result
+      this.subtitlesList = subtitles
     },
     searchFromButter (title) {
       this.externalQuery = title
+    },
+    updatePosition (pos) {
+      this.arrowNavPosition = pos
+    },
+    enter (time) {
+      this.arrowNavEnter = time
     }
   }
 }

@@ -1,8 +1,8 @@
 <template>
-  <div class="subtitles-list">
-    <div class="item"
-      v-bind:key="`item-${index}`"
-      v-for="(subtitle, index) in subtitles"
+  <ol class="subtitles-list">
+    <li class="item" ref="item" v-bind:key="`item-${i}`"
+      v-for="(subtitle, i) in orderedSubtitles"
+      :class="{ 'is-active': i === arrowNavPosition }"
       @click="download(subtitle)">
       <h3 class="item-name"
         @mouseover.stop="itemHover($event)"
@@ -11,52 +11,58 @@
           {{ subtitle.name }}
         </span>
       </h3>
-      <p class="item-meta">
-        <span class="source">{{ subtitle.source }}</span>
-        <span v-if="subtitle.subInfo">{{ subtitle.subInfo.downloads }} downloads</span>
-        <span v-if="subtitle.score !== 0">Rated: {{ subtitle.score }}</span>
-      </p>
-    </div>
-  </div>
+      <ul class="item-meta">
+        <li aria-label="source">{{ subtitle.source }}</li>
+        <li aria-label="downloads" v-if="subtitle.subInfo">{{ subtitle.subInfo.downloads }} downloads</li>
+        <li aria-label="score" v-if="subtitle.score !== 0">Rated: {{subtitle.score}}</li>
+        <li aria-label="hearingImpaired" v-if="subtitle.hearingImpaired">SDH</li>
+        <li aria-label="lang">{{ subtitle.langName }}</li>
+      </ul>
+    </li>
+  </ol>
 </template>
 
 <script>
 import Caption from 'caption-core'
+import Languages from '@/lib/languages'
 const { shell } = require('electron')
 
 export default {
   name: 'Subtitles',
-  props: ['subtitles'],
+  props: ['subtitles', 'arrowNavPosition', 'arrowNavEnter'],
   data () {
     return {
       itemWidth: 0
     }
   },
   methods: {
-    download (result) {
+    download (subtitle) {
       const { dialog } = require('electron').remote
-      const savePath = dialog.showSaveDialog({
-        defaultPath: result.name
-      })
 
-      if (!savePath) {
-        return
-      }
+      var filename = subtitle.name.replace(/ - /g, ' ').replace(/ /g, '.').replace(/.srt$|.str$/gi, '') + '-' + subtitle.langName + '.srt'
+
+      const savePath = dialog.showOpenDialog({
+        title: 'Select a folder',
+        properties: ['openDirectory'],
+        defaultPath: filename
+      })
+      if (!savePath) return
+
+      var path = savePath[0] + '/' + filename
 
       try {
-        Caption.download(result, result.source, savePath)
+        Caption.download(subtitle, subtitle.source, path)
           .then(() => {
             let myNotification = new Notification('Subtitle downloaded!', {
-              body: result.name
+              body: filename
             })
-
             myNotification.onclick = () => {
-              shell.showItemInFolder(savePath)
+              shell.showItemInFolder(path)
             }
           })
-          .catch(err => console.log('error', err))
-      } catch (e) {
-        console.log('err', e)
+          .catch(error => console.log('error', error))
+      } catch (error) {
+        console.log('error', error)
       }
     },
     itemHover (e) {
@@ -66,10 +72,47 @@ export default {
       }
     }
   },
-  watch: {},
+  watch: {
+    arrowNavEnter: function (newVal, oldVal) { // watch it
+      if (this.subtitles.length > 0 && this.arrowNavPosition >= 0) {
+        this.download(this.subtitles[this.arrowNavPosition])
+      }
+    },
+    arrowNavPosition: function (newVal, oldVal) {
+      var $container = this.$parent.$refs.container
+      var containerHeight = $container.clientHeight
+      var scrollTop = $container.scrollTop
+      // console.log($container.scrollTop);
+
+      if (newVal < 0) {
+        $container.scrollTop = 0
+        return
+      }
+
+      var $item = this.$refs.item[newVal]
+      var itemHeight = $item.clientHeight
+      var pos = $item.offsetTop - $container.offsetTop
+      // console.log(pos);
+
+      if (pos < scrollTop) {
+        $container.scrollTop = pos
+      } else if (pos + itemHeight > scrollTop + containerHeight) {
+        $container.scrollTop = (pos + itemHeight) - containerHeight
+      }
+    }
+  },
   computed: {
     calculateWidth: function (e) {
       return this.itemWidth
+    },
+    onlyAddic7ed: function () {
+      return this.subtitles.filter(function (sub) {
+        return sub.source === 'addic7ed'
+      })
+    },
+    orderedSubtitles: function () {
+      // _.orderBy(this.users, ['name', 'last_login'], ['asc', 'desc'])
+      return _.orderBy(this.subtitles, ['source', 'downloads', 'score'], ['asc', 'desc', 'desc'])
     }
   }
 }
@@ -83,10 +126,9 @@ export default {
       text-align: left;
       border-top: 1px solid $lightgrey-color;
       padding: 12px 25px;
-      //cursor: pointer;
       user-select: none;
 
-      &:hover {
+      &.is-active {
         background-color: $lightgrey-color;
       }
 
@@ -95,23 +137,20 @@ export default {
         //overflow-wrap: break-word;
         white-space: nowrap;
         overflow: hidden;
-        //text-overflow: ellipsis;
         width: 100%;
         position: relative;
+        margin-bottom: 5px;
+        font-weight: 400;
 
         span {
-          //position: relative;
           pointer-events: none;
-          display:inline-block;
-          left: 0;
-          //transform: translateX(0);
+          display: inline-block;
           transition: 0s;
         }
 
         &:hover span {
           position: relative;
           transition: 1s linear .3s;
-          //transform: translateX(calc(200px - 100%));
         }
       }
 
@@ -119,8 +158,13 @@ export default {
         font-size: 11px;
         color: $grey-color;
 
+        li {
+          display: inline-block;
+        }
+
         > *:not(:last-child)::after {
-          content: ' | '
+          content: ' | ';
+          margin-right: 3px;
         }
       }
     }
