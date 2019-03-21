@@ -55,7 +55,7 @@ export default {
     Butter.connect()
 
     Butter.subscribe('disconnected', data => {
-      console.log('disconnected', data)
+      this.butterCurrentShow = {}
     })
 
     Butter.subscribe('playingtitle', data => {
