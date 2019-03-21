@@ -65,6 +65,9 @@ export default {
       if (e) e.preventDefault() // Prevent form submit
       if (!this.query) return // Do nothing empty query
 
+      // Use language in query or stored user setting language
+      var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.language
+
       console.log('[INFO] searchByQuery:', this.query)
       this.startLoader()
       this.arrowNavPosition = -1
@@ -72,36 +75,37 @@ export default {
       this.lastQuery = this.query
       this.nothingFound = false
 
-      // Use language in query or stored user setting language
-      var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.language
+      const pushSubtitles = (subtitles) => {
+        // add lang to subtitle object
+        subtitles = subtitles.filter(function (item) {
+          item.langCode = LANG
+          item.lang = item.subInfo ? item.subInfo.lang : ''
+          item.langName = item.lang ? item.lang : Languages.find(l => l.code === LANG).name
+          item.lang = item.subInfo ? item.subInfo.lang : ''
+          item.langId = item.subInfo ? item.subInfo.langId : ''
+          item.downloads = item.subInfo ? item.subInfo.downloads : ''
+          item.distribution = item.subInfo ? item.subInfo.distribution : ''
+          item.team = item.subInfo ? item.subInfo.team : ''
+          item.version = item.subInfo ? item.subInfo.version : ''
+          item.episodeTitle = item.subInfo ? item.subInfo.episodeTitle : ''
+          item.hearingImpaired = item.subInfo ? item.subInfo.hearingImpaired : ''
+          return item
+        })
+        this.endLoader()
+        this.searchResult = subtitles
+        this.nothingFound = this.searchResult.length < 1
+      }
 
       Caption.searchByQuery(this.query, LANG, LIMIT)
+        // All sources are checked.
         .on('fastest', subtitles => {
           // Fastest source has been checked.
           console.log('[INFO] Fastest search result:', subtitles)
-          // this.searchResult = subtitles
+          pushSubtitles(subtitles)
         })
         .on('completed', subtitles => {
-          // All sources are checked.
-          // add lang to subtitle object
-          subtitles = subtitles.filter(function (item) {
-            item.langCode = LANG
-            item.lang = item.subInfo ? item.subInfo.lang : ''
-            item.langName = item.lang ? item.lang : Languages.find(l => l.code === LANG).name
-            item.lang = item.subInfo ? item.subInfo.lang : ''
-            item.langId = item.subInfo ? item.subInfo.langId : ''
-            item.downloads = item.subInfo ? item.subInfo.downloads : ''
-            item.distribution = item.subInfo ? item.subInfo.distribution : ''
-            item.team = item.subInfo ? item.subInfo.team : ''
-            item.version = item.subInfo ? item.subInfo.version : ''
-            item.episodeTitle = item.subInfo ? item.subInfo.episodeTitle : ''
-            item.hearingImpaired = item.subInfo ? item.subInfo.hearingImpaired : ''
-            return item
-          })
           console.log('[INFO] Completed search result:', subtitles)
-          this.endLoader()
-          this.searchResult = subtitles
-          this.nothingFound = this.searchResult.length < 1
+          pushSubtitles(subtitles)
         })
     },
     reset () {
@@ -158,6 +162,16 @@ export default {
       // console.log('[WATCH] ArrowNav position:', newVal, '| was:', oldVal)
       this.$emit('arrow-navigation', this.arrowNavPosition)
     }
+  },
+  mounted () {
+    this.$store.subscribe((mutation, state) => {
+      // console.log(mutation, state)
+      switch (mutation.type) {
+        case 'setUserLanguage':
+          this.searchSubtitles()
+          break
+      }
+    })
   }
 }
 </script>
