@@ -10,10 +10,10 @@ export default new Vuex.Store({
       language: 'eng',
       butter: {
         enable: true,
-        ip: '192.168.1.24',
-        username: 'popcorn',
-        password: 'popcorn',
-        port: '8008'
+        ip: '',
+        username: '',
+        password: '',
+        port: ''
       }
     }
   },

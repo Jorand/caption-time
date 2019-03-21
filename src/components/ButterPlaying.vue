@@ -24,8 +24,11 @@
 <script>
 import ButterRemote from '@/lib/butter-remote'
 
+let Butter = {}
+
 export default {
   name: 'ButterRemote',
+  props: ['updateButterSettings'],
   data () {
     return {
       isActive: true,
@@ -46,11 +49,7 @@ export default {
   },
   computed: {},
   mounted () {
-    // this.$store.state.userSettings.butter
-    // this.$store.commit('setUserLanguage', this.selectedValue)
-    // getters
-
-    var Butter = new ButterRemote(this.$store.state.userSettings.butter)
+    Butter = new ButterRemote(this.$store.state.userSettings.butter)
 
     Butter.connect()
 
@@ -78,6 +77,11 @@ export default {
         this.$emit('title-playing', data.query)
       }
     })
+  },
+  watch: {
+    updateButterSettings: function (newVal, oldVal) { // watch it
+      Butter.updateSettings(newVal)
+    }
   },
   destroy () {
     clearInterval(this.butterInterval)

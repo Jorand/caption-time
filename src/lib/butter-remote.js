@@ -1,11 +1,18 @@
 import axios from 'axios'
 import tnp from 'torrent-name-parser'
 
+const defaultConfig = {
+  username: 'popcorn',
+  password: 'popcorn',
+  ip: '127.0.0.1',
+  port: '8008'
+}
+
 export default function ({
-  username = 'popcorn',
-  password = 'popcorn',
-  ip = '127.0.0.1',
-  port = '8008',
+  username = defaultConfig.username,
+  password = defaultConfig.password,
+  ip = defaultConfig.ip,
+  port = defaultConfig.port,
   debug = false
 } = {}) {
   let isConnected = false
@@ -17,59 +24,86 @@ export default function ({
     return (n < 10) ? ('0' + n) : n
   }
 
+  this.disconnect = () => {
+    clearInterval(butterInterval)
+    disconnect()
+    return 'DONE'
+  }
+
+  this.updateSettings = (data) => {
+    // if parameters are empty set to default
+    username = data.username || defaultConfig.username
+    password = data.password || defaultConfig.password
+    ip = data.ip || defaultConfig.ip
+    port = data.port || defaultConfig.port
+
+    console.log('[INFO] Butter Settings:', { username, password, ip, port })
+  }
+
   this.connect = () => {
+    this.updateSettings({ username, password, ip, port })
     clearInterval(butterInterval)
     butterInterval = setInterval((function x () {
       if (isConnected) {
         // Do work for subscribers
-        if (isEmpty(topics)) {
-          return
-        }
-        for (const key in topics) {
-          switch (key) {
-            case 'ping':
-              call('ping', false).then(function (result) {
-                console.log(result)
-                // catch
-              })
-              break
-            case 'playingtitle':
-              call('getplaying', false)
-                .then((data) => {
-                  const result = isShowPlaying(data)
-                  return result.title ? result : call('getloading', false)
-                })
-                .then((data) => {
-                  if (data !== false) {
-                    const result = isShowPlaying(data)
-                    if (result.title) {
-                      if (result.title !== lastTitle) {
-                        result.tnp = paseTitle(result.title)
-                        lastTitle = result.title
-                        publish('playingtitle', result)
-                      }
-                    } else {
-                      publish('playingtitle', {})
-                    }
-                  }
-                })
-              break
-          }
-        }
+        fireSubscribersCall()
+        // make sure we are connected and fire disconnected if not
+        call('ping', false)
       } else {
         console.log('[INFO] New connection attempt to Popcorn-Time...')
+        // try to find the good ip
+        call('ping', false)
       }
-      call('ping', false)
       return x
     }()), 2000)
   }
 
-  const call = (method, params) => {
-    log('CALL', method)
+  const fireSubscribersCall = () => {
+    if (isEmpty(topics)) {
+      return
+    }
+    for (const key in topics) {
+      switch (key) {
+        case 'ping':
+          call('ping', false)
+            .then(function (result) {
+              console.log(result)
+              // catch
+            })
+          break
+        case 'playingtitle':
+          call('getplaying', false)
+            .then((data) => {
+              const result = isShowPlaying(data)
+              return result.title ? result : call('getloading', false)
+            })
+            .then((data) => {
+              if (data !== false) {
+                const result = isShowPlaying(data)
+                if (result.title) {
+                  if (result.title !== lastTitle) {
+                    result.tnp = paseTitle(result.title)
+                    lastTitle = result.title
+                    publish('playingtitle', result)
+                  }
+                } else {
+                  publish('playingtitle', {})
+                }
+              }
+            })
+          break
+      }
+    }
+  }
+
+  const call = (method, params, testIp = null) => {
     // Popcorn time API
     // https://github.com/liszd/Popcorn-Time-Desktop/blob/master/docs/json-rpc-api.md
+    var callIp = testIp || ip
+    log('[CALL]', method, callIp)
+
     return new Promise((resolve, reject) => {
-      axios.post('http://' + ip + ':' + port, {
+      axios.post('http://' + callIp + ':' + port, {
         id: Math.floor((Math.random() * 100) + 1),
         jsonrpc: '2.0',
         method,
@@ -88,9 +122,11 @@ export default function ({
             // Use "soft" to diff from connection error
             throw new CustomError('Popcorn-Time not responding: ' + data.error.message, 'soft')
           } else {
-            connected()
+            connect()
+            data.callIp = response.config.url.replace('http://', '').replace(':' + port, '')
             return resolve(data)
           }
+          // For now if credetials are wrond its catched in catch
           // if (!isConnected) {
           //   throw new Error('Invalid login: Check username and password.')
           // }
@@ -100,12 +136,12 @@ export default function ({
           if (!error.type || error.type !== 'soft') {
             disconnect()
             console.log(error.message)
-            // Change IP
+            // Change IP handle in connect
           } else {
             // Popcorn-Time is not responding
             // TODO: maybe add a timeout
           }
-          // return reject(error.message)
+          // return reject()
         })
     })
   }
@@ -118,7 +154,7 @@ export default function ({
     }
   }
 
-  const connected = () => {
+  const connect = () => {
     if (!isConnected) {
       isConnected = true
       console.info('[INFO] Popcorn-Time is Connected !')

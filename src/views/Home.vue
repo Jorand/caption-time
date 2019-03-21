@@ -1,6 +1,9 @@
 <template>
   <div class="home flex-container">
-    <ButterPlaying v-on:title-playing="searchFromButter" />
+    <ButterPlaying
+      v-if="butterRemoteIsEnable"
+      v-on:title-playing="searchFromButter"
+      v-bind:updateButterSettings="newButterSettings" />
     <SearchInput
       v-on:search-result="updateSubtitles"
       v-on:arrow-navigation="updatePosition"
@@ -16,6 +19,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import SearchInput from '@/components/SearchInput.vue'
 import Subtitles from '@/components/Subtitles.vue'
 import ButterPlaying from '@/components/ButterPlaying.vue'
@@ -32,7 +36,8 @@ export default {
       subtitlesList: [],
       externalQuery: '',
       arrowNavPosition: -1,
-      arrowNavEnter: 0
+      arrowNavEnter: 0,
+      newButterSettings: {}
     }
   },
   methods: {
@@ -50,6 +55,11 @@ export default {
     enter (time) {
       this.arrowNavEnter = time
     }
+  },
+  computed: {
+    ...mapGetters([
+      'butterRemoteIsEnable'
+    ])
   }
 }
 </script>
