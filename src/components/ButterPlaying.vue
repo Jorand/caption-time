@@ -24,16 +24,6 @@
 <script>
 import ButterRemote from '@/lib/butter-remote'
 
-const POPWATCH = true
-
-var Butter = new ButterRemote({
-  username: 'popcorn',
-  password: 'popcorn',
-  ip: '192.168.1.33',
-  port: '8008',
-  debug: false
-})
-
 export default {
   name: 'ButterRemote',
   data () {
@@ -56,54 +46,38 @@ export default {
   },
   computed: {},
   mounted () {
-    if (!POPWATCH) return
+    // this.$store.state.userSettings.butter
+    // this.$store.commit('setUserLanguage', this.selectedValue)
+    // getters
+
+    var Butter = new ButterRemote(this.$store.state.userSettings.butter)
 
     Butter.connect()
-      .then((data) => {
-        startButterCall()
-      })
-      .catch(err => {
-        console.warn('[WARN]: Connection Fail: ', err)
-        startButterCall()
-      })
 
-    const getTitle = () => {
-      Butter.getPlayingTitle(data => {
-        // console.log(data);
-        if (data.error !== undefined) {
-          this.butterCurrentShow = {}
-          console.warn('[WARN]: ', data.error)
-        } else {
-          if (data.title) {
-            if (this.butterCurrentShow.title !== data.title) {
-              data.tnp = Butter.paseTitle(data.title)
-              console.info('[INFO] Playing:', data.title, data)
+    Butter.subscribe('disconnected', data => {
+      console.log('disconnected', data)
+    })
 
-              var show = data.tnp
-              data.query = show.title
-              if (show.season && show.episode) {
-                data.isShow = true
-                data.query += ' S' + Butter.pad(show.season) + ' E' + Butter.pad(show.episode) + (show.quality ? ' ' + show.quality : '')
-              }
-              this.butterCurrentShow = data
-              this.isActive = true
-              console.info('[INFO] Emit:', data.query)
-              this.$emit('title-playing', data.query)
-            }
-          } else {
-            this.butterCurrentShow = {}
-          }
+    Butter.subscribe('playingtitle', data => {
+      if (!data.title) {
+        this.butterCurrentShow = {}
+        return
+      }
+
+      if (this.butterCurrentShow.title !== data.title) {
+        console.info('[INFO] Playing:', data.title, data)
+        var show = data.tnp
+        data.query = show.title
+        if (show.season && show.episode) {
+          data.isShow = true
+          data.query += ' S' + Butter.pad(show.season) + ' E' + Butter.pad(show.episode) + (show.quality ? ' ' + show.quality : '')
         }
-      })
-    }
-
-    const startButterCall = () => {
-      getTitle()
-      clearInterval(this.butterInterval)
-      this.butterInterval = setInterval(() => {
-        getTitle()
-      }, 2000)
-    }
+        this.butterCurrentShow = data
+        this.isActive = true
+        console.info('[INFO] Emit:', data.query)
+        this.$emit('title-playing', data.query)
+      }
+    })
   },
   destroy () {
     clearInterval(this.butterInterval)

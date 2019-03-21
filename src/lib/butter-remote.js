@@ -8,14 +8,66 @@ export default function ({
   port = '8008',
   debug = false
 } = {}) {
-  this.isConnected = false
+  let isConnected = false
+  let topics = {}
+  let butterInterval = null
+  let lastTitle = ''
 
-  this.connect = () => {
-    console.info('[INFO] Try connecting to Popcorn-Time...')
-    return this.ping()
+  this.pad = (n) => {
+    return (n < 10) ? ('0' + n) : n
   }
 
-  this.call = (method, params) => {
+  this.connect = () => {
+    clearInterval(butterInterval)
+    butterInterval = setInterval((function x () {
+      if (isConnected) {
+        // Do work for subscribers
+        if (isEmpty(topics)) {
+          return
+        }
+        for (const key in topics) {
+          switch (key) {
+            case 'ping':
+              call('ping', false).then(function (result) {
+                console.log(result)
+                // catch
+              })
+              break
+            case 'playingtitle':
+              call('getplaying', false)
+                .then((data) => {
+                  const result = isShowPlaying(data)
+                  return result.title ? result : call('getloading', false)
+                })
+                .then((data) => {
+                  if (data !== false) {
+                    const result = isShowPlaying(data)
+                    if (result.title) {
+                      if (result.title !== lastTitle) {
+                        result.tnp = paseTitle(result.title)
+                        lastTitle = result.title
+                        publish('playingtitle', result)
+                      }
+                    } else {
+                      publish('playingtitle', {})
+                    }
+                  }
+                })
+              break
+          }
+        }
+      } else {
+        console.log('[INFO] New connection attempt to Popcorn-Time...')
+      }
+      call('ping', false)
+      return x
+    }()), 2000)
+  }
+
+  const call = (method, params) => {
+    log('CALL', method)
+    // Popcorn time API
+    // https://github.com/liszd/Popcorn-Time-Desktop/blob/master/docs/json-rpc-api.md
     return new Promise((resolve, reject) => {
       axios.post('http://' + ip + ':' + port, {
         id: Math.floor((Math.random() * 100) + 1),
@@ -30,61 +82,76 @@ export default function ({
         timeout: 3000
       })
         .then(response => {
-          this.log(response)
-          // console.log(response)
           const data = response.data.result ? response.data.result : response.data
-          this.handleData(data, method)
 
-          if (!this.isConnected) {
-            throw new Error('Invalid login: Check username and password.')
-          } else if (data.error !== undefined) {
+          if (data.error !== undefined) {
             // Use "soft" to diff from connection error
             throw new CustomError('Popcorn-Time not responding: ' + data.error.message, 'soft')
           } else {
+            connected()
             return resolve(data)
           }
+          // if (!isConnected) {
+          //   throw new Error('Invalid login: Check username and password.')
+          // }
         })
         .catch(error => {
-          this.log(error.message)
           // Fire disconnect only if it's a connection error
           if (!error.type || error.type !== 'soft') {
-            this.disconnect()
+            disconnect()
+            console.log(error.message)
+            // Change IP
+          } else {
+            // Popcorn-Time is not responding
+            // TODO: maybe add a timeout
           }
-          return reject(error.message)
+          // return reject(error.message)
         })
-
-      function CustomError (message, type) {
-        const error = new Error(message)
-        error.type = type
-        return error
-      }
     })
   }
 
-  this.handleData = (data, method) => {
-    if (method === 'ping') {
-    // console.log(data);
-      if (data.error !== undefined) {
-        this.disconnect()
-      } else {
-        this.connected()
-      }
+  const disconnect = () => {
+    if (isConnected) {
+      isConnected = false
+      console.warn('[WARN] Popcorn-Time disconnected !')
+      publish('disconnected')
     }
   }
 
-  this.paseTitle = (rawTitle) => {
-    console.log('[INFO] Parser In:', rawTitle)
+  const connected = () => {
+    if (!isConnected) {
+      isConnected = true
+      console.info('[INFO] Popcorn-Time is Connected !')
+      publish('connected')
+    }
+  }
+
+  const isShowPlaying = (data) => {
+    let show = {}
+    if (data && data.title) {
+      show = {
+        title: data.title,
+        duration: data.duration,
+        quality: data.quality,
+        selectedSubtitle: data.selectedSubtitle
+      }
+    }
+    return show
+  }
+
+  const paseTitle = (rawTitle) => {
+    log('[INFO] Parser In:', rawTitle)
     // Clean title to extract Titre Saison Episode …
-    var titleTpn = rawTitle
+    let titleTpn = rawTitle
       // .replace(/ - /g, ' ')
       .replace(/,/g, '')
       .replace(/Season |Saison /g, 'S')
       .replace(/Episode |Épisode /g, 'E')
       .replace(/&amp;/g, '')
 
-    var regexp = new RegExp(/([S|E])([0-9]+)/, 'ig')
+    let regexp = new RegExp(/([S|E])([0-9]+)/, 'ig')
 
-    var self = this
+    let self = this
     titleTpn = titleTpn.replace(regexp,
       function (match, p1, p2, p3, offset, string) {
         return p1 + '' + self.pad(p2)
@@ -94,95 +161,50 @@ export default function ({
       titleTpn += ' -Film'
     }
 
-    console.log('[INFO] Parser Out:', titleTpn)
+    log('[INFO] Parser Out:', titleTpn)
 
     return tnp(titleTpn)
   }
 
-  this.pad = (n) => {
-    return (n < 10) ? ('0' + n) : n
+  function isEmpty (obj) {
+    return (Object.getOwnPropertyNames(obj).length === 0)
   }
 
-  this.disconnect = () => {
-    if (this.isConnected) {
-      this.isConnected = false
-      console.warn('[WARN] Popcorn-Time disconnected !')
-    }
+  const CustomError = function (message, type) {
+    const error = new Error(message)
+    error.type = type
+    return error
   }
 
-  this.connected = () => {
-    if (!this.isConnected) {
-      this.isConnected = true
-      console.info('[INFO] Popcorn-Time is Connected !')
-    }
-  }
-
-  this.log = (msg) => {
+  const log = (msg) => {
     if (debug === true) console.log(msg)
   }
 
-  // CUSTOM GETTER
+  // Publish / Subscribe
+  // https://codepen.io/RobHowells/pen/vZqxaV?editors=0010
 
-  this.getPlayingTitle = (callback) => {
-    const sendError = (error) => {
-      if (callback) {
-        var er = { error: error }
-        callback(er)
-      }
+  this.subscribe = (topic, listener) => {
+    // make sure there is a topic and listener
+    if (!topic || !listener) {
+      console.warn('[WARN] Subscribe: Missing parameter. ')
+      return
     }
-
-    const whenConnected = () => {
-      this.getPlaying()
-        .then(result => isShowPlaying(result))
-        .catch(error => sendError(error))
+    // create the topic if not yet created
+    if (!topics[topic]) {
+      topics[topic] = []
     }
-
-    const isShowPlaying = (data, last = false) => {
-      this.log(data)
-      var show = {}
-      if (data && data.title) {
-        show = {
-          title: data.title,
-          duration: data.duration,
-          quality: data.quality,
-          selectedSubtitle: data.selectedSubtitle
-        }
-        if (callback) callback(show)
-      } else if (last !== true) {
-        this.getLoading()
-          .then(result => isShowPlaying(result, true))
-          .catch(error => sendError(error))
-      } else {
-        if (callback) callback(show)
-      }
-    }
-
-    if (!this.isConnected) {
-      console.info('[INFO]: New connection attempt.')
-      this.ping()
-        .then(result => whenConnected())
-        .catch(error => this.log('Cannot reach Popcorn-Time: ', error))
-    } else {
-      whenConnected()
-    }
+    // add the listener to queue
+    topics[topic].push(listener)
   }
 
-  // Popcorn time API
-  // https://github.com/liszd/Popcorn-Time-Desktop/blob/master/docs/json-rpc-api.md
-
-  this.ping = () => {
-    return this.call('ping', false)
-  }
-
-  this.getPlaying = () => {
-    return this.call('getplaying', false)
-  }
-
-  this.getLoading = () => {
-    return this.call('getloading', false)
-  }
-
-  this.getViewStack = () => {
-    return this.call('getviewstack', false)
+  function publish (topic, data) { // Publish is private
+    // make sure the topic and listeners exist
+    if (!topics[topic] || topics[topic].length < 1) {
+      return
+    }
+    // send the event to all listeners
+    topics[topic].forEach(function (listener) {
+      listener(data || {})
+    })
   }
 }
