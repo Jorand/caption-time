@@ -23,14 +23,15 @@
     "start": "npm run electron:serve"
   },
   "dependencies": {
-    "electron": "^4.0.0",
     "axios": "^0.18.0",
-    "caption-core": "^2.1.1",
+    "caption-core": "^2.2.0-beta1",
+    "electron": "^4.0.0",
+    "iconv-lite": "^0.4.24",
     "rimraf": "^2.6.3",
+    "torrent-name-parser": "^0.6.5",
     "vue": "^2.6.6",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1",
-    "torrent-name-parser": "^0.6.5"
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",

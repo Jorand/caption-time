@@ -38,6 +38,7 @@ export default {
       lastQuery: '',
       isLoading: false,
       searchResult: [],
+      tempSearchResult: [],
       arrowNavPosition: -1,
       nothingFound: false,
       online: false,
@@ -75,6 +76,7 @@ export default {
       console.log('[INFO] searchByQuery:', this.query)
       this.startLoader()
       this.arrowNavPosition = -1
+      this.tempSearchResult = []
       this.searchResult = []
       this.lastQuery = this.query
       this.nothingFound = false
@@ -93,9 +95,10 @@ export default {
           item.version = item.subInfo ? item.subInfo.version : ''
           item.episodeTitle = item.subInfo ? item.subInfo.episodeTitle : ''
           item.hearingImpaired = item.subInfo ? item.subInfo.hearingImpaired : ''
+          item.resultSearchGroup = source
           return item
         })
-        this.searchResult = subtitles
+        this.tempSearchResult = subtitles
 
         if (source === 'completed') {
           this.endLoader()
@@ -116,7 +119,9 @@ export default {
         })
         .on('completed', subtitles => {
           console.log('[INFO] Completed search result:', subtitles)
+          // setTimeout(() => {
           pushSubtitles(subtitles, 'completed')
+          // }, 5000)
         })
     },
     reset () {
@@ -129,6 +134,7 @@ export default {
       this.isLoading = true
     },
     endLoader () {
+      this.searchResult = this.tempSearchResult
       clearTimeout(this.timeoutSearch)
       this.nothingFound = this.searchResult.length < 1
       this.isLoading = false

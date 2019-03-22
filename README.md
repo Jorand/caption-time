@@ -64,3 +64,4 @@ npm run lint
 ## Troubleshooting
 * iconv-lite: [`__webpack_require__(...) is not a function`](https://github.com/ashtuchkin/iconv-lite/issues/204)
 * addic7ed-api: [`StatusCodeError {name: "StatusCodeError", statusCode: 301, message: "301`](https://github.com/same31/addic7ed-api/issues/9)
+* caption-core: [zlib `incorrect header check`] (https://github.com/gielcobben/caption-core/issues/9)

@@ -50,7 +50,7 @@ export default function ({
         // make sure we are connected and fire disconnected if not
         call('ping', false)
       } else {
-        console.log('[INFO] New connection attempt to Popcorn-Time...')
+        log('[INFO] New connection attempt to Popcorn-Time...')
         // try to find the good ip
         call('ping', false)
       }
@@ -135,7 +135,7 @@ export default function ({
           // Fire disconnect only if it's a connection error
           if (!error.type || error.type !== 'soft') {
             disconnect()
-            console.log(error.message)
+            log(error.message)
             // Change IP handle in connect
           } else {
             // Popcorn-Time is not responding

@@ -1,7 +1,7 @@
 <template>
   <ol class="subtitles-list">
     <li class="item" ref="item" v-bind:key="`item-${i}`"
-      v-for="(subtitle, i) in orderedSubtitles"
+      v-for="(subtitle, i) in subtitles"
       :class="{ 'is-active': i === arrowNavPosition }"
       @click="download(subtitle)">
       <h3 class="item-name"
@@ -17,6 +17,7 @@
         <li aria-label="score" v-if="subtitle.score !== 0">Rated: {{subtitle.score}}</li>
         <li aria-label="hearingImpaired" v-if="subtitle.hearingImpaired">SDH</li>
         <li aria-label="lang">{{ subtitle.langName }}</li>
+        <li aria-label="speed">{{ subtitle.resultSearchGroup }}</li>
       </ul>
     </li>
   </ol>
@@ -26,9 +27,11 @@
 import Caption from 'caption-core'
 import _ from 'lodash'
 const { shell } = require('electron')
-const { dialog } = require('electron').remote
+const remote = require('electron').remote
+const { dialog, app } = remote
 
 function uiError (msg, error) {
+  console.log(error)
   dialog.showErrorBox('Oops! Something went wrong', msg + ': ' + error)
 }
 
@@ -41,30 +44,34 @@ export default {
     }
   },
   methods: {
+    notification: (message) => {
+      console.log(app.getName(), message);
+      const myNotification = new Notification(app.getName(), {
+        body: message
+      })
+      myNotification.onclick = () => {
+        shell.showItemInFolder(savePath)
+      }
+    },
     download (subtitle) {
-      var filename = subtitle.name.replace(/ - /g, ' ').replace(/ /g, '.').replace(/.srt$|.str$/gi, '') + '-' + subtitle.langName + '.srt'
-
-      const savePath = dialog.showOpenDialog({
-        title: 'Select a folder',
+      // var filename = subtitle.name.replace(/ - /g, ' ').replace(/ /g, '.').replace(/.srt$|.str$/gi, '') + '-' + subtitle.langName
+      const hasExtension = subtitle.name.includes(".srt");
+      var filename = hasExtension ? subtitle.name : `${subtitle.name}.srt`;
+      const mainWindow = remote.getCurrentWindow()
+      const savePath = dialog.showSaveDialog(mainWindow, {
+        title: 'Download',
         properties: ['openDirectory'],
         defaultPath: filename
       })
       if (!savePath) return
-
-      var path = savePath[0] + '/' + filename
-
       try {
-        Caption.download(subtitle, subtitle.source, path)
+        Caption.download(subtitle, subtitle.source, savePath)
           .then(() => {
-            let myNotification = new Notification('Subtitle downloaded!', {
-              body: filename
-            })
-            myNotification.onclick = () => {
-              shell.showItemInFolder(path)
-            }
+            this.notification(`${filename} is successfully downloaded!`)
           })
-          .catch(error => {
-            uiError('Download failed', error)
+          .catch(err => {
+            console.log("err", err)
+            uiError('Download failed', err)
           })
       } catch (error) {
         uiError('Download failed', error)
@@ -106,6 +113,7 @@ export default {
       }
     }
   },
+  mounted () {},
   computed: {
     calculateWidth: function (e) {
       return this.itemWidth
@@ -146,6 +154,7 @@ export default {
         position: relative;
         margin-bottom: 5px;
         font-weight: 400;
+        user-select: text;
 
         span {
           pointer-events: none;

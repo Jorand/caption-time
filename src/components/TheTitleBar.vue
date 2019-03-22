@@ -1,5 +1,5 @@
 <template>
-  <header class="title-bar">
+  <header id="toolbar" class="title-bar">
     <div class="left"></div>
     <h1 class="title">{{ appName }}</h1>
     <div class="right">
@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import electron from 'electron'
 import SelectLanguage from '@/components/SelectLanguage.vue'
+const remote = require('electron').remote
 
 export default {
   name: 'TheTitleBar',
@@ -19,8 +19,13 @@ export default {
   },
   data () {
     return {
-      appName: electron.remote.app.getName()
+      appName: remote.app.getName()
     }
+  },
+  mounted () {
+    var toolbarRect = document.getElementById('toolbar').getBoundingClientRect()
+    var win = remote.getCurrentWindow()
+    win.setSheetOffset(toolbarRect.height)
   }
 }
 </script>
