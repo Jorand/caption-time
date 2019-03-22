@@ -102,10 +102,10 @@ export default {
         }
       }
 
-      clearTimeout(this.timeoutSearch);
+      clearTimeout(this.timeoutSearch)
       this.timeoutSearch = setTimeout(() => {
         this.endLoader()
-      }, 10000);
+      }, 10000)
 
       Caption.searchByQuery(this.query, LANG, LIMIT)
         // All sources are checked.
@@ -129,7 +129,7 @@ export default {
       this.isLoading = true
     },
     endLoader () {
-      clearTimeout(this.timeoutSearch);
+      clearTimeout(this.timeoutSearch)
       this.nothingFound = this.searchResult.length < 1
       this.isLoading = false
     },
@@ -153,8 +153,7 @@ export default {
         this.reset()
       } else if (this.query !== this.lastQuery) {
         this.searchSubtitles()
-      }
-      else {
+      } else {
         this.$emit('arrow-enter', Date.now())
       }
     },
