@@ -65,6 +65,7 @@ export default {
       padding-left: 10px;
       vertical-align: middle;
       margin-top: 8px;
+      pointer-events: none;
 
       &::after {
         content: '';

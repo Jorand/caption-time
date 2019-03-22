@@ -44,8 +44,7 @@ export default {
     }
   },
   methods: {
-    notification: (message) => {
-      console.log(app.getName(), message);
+    notification: (message, savePath) => {
       const myNotification = new Notification(app.getName(), {
         body: message
       })
@@ -54,9 +53,9 @@ export default {
       }
     },
     download (subtitle) {
-      // var filename = subtitle.name.replace(/ - /g, ' ').replace(/ /g, '.').replace(/.srt$|.str$/gi, '') + '-' + subtitle.langName
-      const hasExtension = subtitle.name.includes(".srt");
-      var filename = hasExtension ? subtitle.name : `${subtitle.name}.srt`;
+      const hasExtension = subtitle.name.includes('.srt')
+      let filename = hasExtension ? subtitle.name.replace(/.srt$|.str$/gi, '') : subtitle.name
+      filename = `${filename}-${subtitle.langName}.srt`
       const mainWindow = remote.getCurrentWindow()
       const savePath = dialog.showSaveDialog(mainWindow, {
         title: 'Download',
@@ -67,10 +66,10 @@ export default {
       try {
         Caption.download(subtitle, subtitle.source, savePath)
           .then(() => {
-            this.notification(`${filename} is successfully downloaded!`)
+            this.notification(`${filename} is successfully downloaded!`, savePath)
           })
           .catch(err => {
-            console.log("err", err)
+            console.log('[ERROR] download:', err)
             uiError('Download failed', err)
           })
       } catch (error) {

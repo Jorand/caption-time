@@ -4,8 +4,6 @@
       <input autofocus type="text" placeholder="Enter show or movie name…"
       name="search-input" class="search-input" ref="searchInput"
       v-model="query"
-      @keydown.down="onArrowDown"
-      @keydown.up="onArrowUp"
       @keydown.enter="onEnter" />
       <i class="icon-search"></i>
       <button type="reset" name="reset" value="Reset" class="search-reset icon-cross"
@@ -34,12 +32,11 @@ export default {
   props: ['remoteQuery'],
   data () {
     return {
-      query: '',
+      query: 'supergirl S01E01',
       lastQuery: '',
       isLoading: false,
       searchResult: [],
       tempSearchResult: [],
-      arrowNavPosition: -1,
       nothingFound: false,
       online: false,
       timeoutSearch: null
@@ -75,7 +72,6 @@ export default {
 
       console.log('[INFO] searchByQuery:', this.query)
       this.startLoader()
-      this.arrowNavPosition = -1
       this.tempSearchResult = []
       this.searchResult = []
       this.lastQuery = this.query
@@ -139,18 +135,6 @@ export default {
       this.nothingFound = this.searchResult.length < 1
       this.isLoading = false
     },
-    onArrowDown (event) {
-      event.preventDefault()
-      if (this.arrowNavPosition < this.searchResult.length - 1 && this.searchResult.length) {
-        this.arrowNavPosition++
-      }
-    },
-    onArrowUp (event) {
-      event.preventDefault()
-      if (this.arrowNavPosition > 0) {
-        this.arrowNavPosition--
-      }
-    },
     onEnter (event) {
       event.preventDefault()
       // If query hase change: Send Query
@@ -159,8 +143,6 @@ export default {
         this.reset()
       } else if (this.query !== this.lastQuery) {
         this.searchSubtitles()
-      } else {
-        this.$emit('arrow-enter', Date.now())
       }
     },
     isOnline () {
@@ -204,10 +186,6 @@ export default {
         this.query = newVal
         this.searchSubtitles()
       }
-    },
-    arrowNavPosition: function (newVal, oldVal) {
-      // console.log('[WATCH] ArrowNav position:', newVal, '| was:', oldVal)
-      this.$emit('arrow-navigation', this.arrowNavPosition)
     }
   },
   mounted () {

@@ -1,13 +1,15 @@
 <template>
-  <div class="home flex-container">
+  <div tabindex="0" class="home flex-container"
+    @focus="focus"
+    @keydown.down="onArrowDown"
+    @keydown.up="onArrowUp"
+    @keydown.enter="onEnter">
     <ButterPlaying
       v-if="butterRemoteIsEnable"
       v-on:title-playing="searchFromButter"
       v-bind:updateButterSettings="newButterSettings" />
     <SearchInput
       v-on:search-result="updateSubtitles"
-      v-on:arrow-navigation="updatePosition"
-      v-on:arrow-enter="enter"
       v-bind:remoteQuery="externalQuery" />
     <div class="flex-content" ref="container">
       <Subtitles
@@ -44,16 +46,32 @@ export default {
     updateSubtitles (subtitles) {
       // const { title, id } = result
       // this.subtitles = [...this.subtitles, result];
+      this.arrowNavPosition = -1
       this.subtitlesList = subtitles
     },
     searchFromButter (title) {
       this.externalQuery = title
     },
-    updatePosition (pos) {
-      this.arrowNavPosition = pos
+    focus (event) {
+      if (this.arrowNavPosition < 0) {
+        this.onArrowDown()
+      }
     },
-    enter (time) {
-      this.arrowNavEnter = time
+    onArrowDown (event) {
+      if (this.arrowNavPosition < this.subtitlesList.length - 1 && this.subtitlesList.length) {
+        this.arrowNavPosition++
+      }
+    },
+    onArrowUp (event) {
+      if (this.arrowNavPosition > 0) {
+        this.arrowNavPosition--
+      }
+    },
+    onEnter (event) {
+      event.preventDefault()
+      // If query hase change: Send Query
+      // console.log(this.query, this.lastQuery)
+      this.arrowNavEnter = Date.now()
     }
   },
   computed: {
