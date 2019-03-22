@@ -10,6 +10,7 @@
         @click.stop="reset">
       </button>
     </form>
+
     <div class="event-toast loader" v-if="isLoading">
       Searching…
     </div>

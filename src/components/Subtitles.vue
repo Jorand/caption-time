@@ -1,26 +1,61 @@
 <template>
-  <ol class="subtitles-list">
-    <li class="item" ref="item" v-bind:key="`item-${i}`"
-      v-for="(subtitle, i) in subtitles"
-      :class="{ 'is-active': i === arrowNavPosition }"
-      @click="download(subtitle)">
-      <h3 class="item-name"
-        @mouseover.stop="itemHover($event)"
-        @mouseout.stop="itemWidth = 0">
-        <span v-bind:style="{ left: '-' + calculateWidth + 'px' }">
-          {{ subtitle.name }}
-        </span>
-      </h3>
-      <ul class="item-meta">
-        <li aria-label="source">{{ subtitle.source }}</li>
-        <li aria-label="downloads" v-if="subtitle.subInfo">{{ subtitle.subInfo.downloads }} downloads</li>
-        <li aria-label="score" v-if="subtitle.score !== 0">Rated: {{subtitle.score}}</li>
-        <li aria-label="hearingImpaired" v-if="subtitle.hearingImpaired">SDH</li>
-        <li aria-label="lang">{{ subtitle.langName }}</li>
-        <li aria-label="speed">{{ subtitle.resultSearchGroup }}</li>
+  <div class="subtitles-wrapper">
+    <div class="actionsBar">
+      <ul class="left">
+        <li class="bar-item">
+          <button type="button" name="show-all"
+            :class="{active: activeFilter === 'all'}"
+            @click="filterSubtitles('all')"
+            @keydown.enter="filterSubtitles('all')"
+            @focus="actionFocused = true"
+            @blur="actionFocused = false">All</button>
+        </li>
+        <li class="bar-item" v-bind:key="`source-${i}`"
+          v-for="(source, i) in sources">
+          <button type="button" name="filter"
+            :class="{active: activeFilter === source}"
+            @click="filterSubtitles(source)"
+            @keydown.enter="filterSubtitles(source)"
+            @focus="actionFocused = true"
+            @blur="actionFocused = false">{{source}}</button>
+        </li>
       </ul>
-    </li>
-  </ol>
+      <div class="right">
+        <div class="bar-item">
+          <button class="button" type="button" name="download-all"
+            @click="downloadAll()"
+            @keydown.enter="downloadAll()"
+            @focus="actionFocused = true"
+            @blur="actionFocused = false">
+            Download all
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="subtitles-container" ref="containerSubtitlesScroll">
+      <ol class="subtitles-list">
+        <li class="item" ref="item" v-bind:key="`item-${i}`"
+          v-for="(subtitle, i) in subtitlesList"
+          :class="{ 'is-active': i === arrowNavPosition }"
+          @click="download(subtitle)">
+          <h3 class="item-name"
+            @mouseover.stop="itemHover($event)"
+            @mouseout.stop="itemWidth = 0">
+            <span v-bind:style="{ left: '-' + calculateWidth + 'px' }">
+              {{ subtitle.name }}
+            </span>
+          </h3>
+          <ul class="item-meta">
+            <li aria-label="source">{{ subtitle.source }}</li>
+            <li aria-label="downloads" v-if="subtitle.subInfo">{{ subtitle.subInfo.downloads }} downloads</li>
+            <li aria-label="score" v-if="subtitle.score !== 0">Rated: {{subtitle.score}}</li>
+            <li aria-label="hearingImpaired" v-if="subtitle.hearingImpaired">SDH</li>
+            <li aria-label="lang">{{ subtitle.langName }}</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -40,7 +75,11 @@ export default {
   props: ['subtitles', 'arrowNavPosition', 'arrowNavEnter'],
   data () {
     return {
-      itemWidth: 0
+      itemWidth: 0,
+      subtitlesList: [],
+      sources: [],
+      actionFocused: false,
+      activeFilter: 'all'
     }
   },
   methods: {
@@ -81,16 +120,36 @@ export default {
         var diff = e.target.firstChild.clientWidth - e.target.clientWidth
         this.itemWidth = diff > 0 ? diff : 0
       }
+    },
+    filterSubtitles (source) {
+      this.activeFilter = source
+      switch (source) {
+        case 'all':
+          this.subtitlesList = _.orderBy(this.subtitles, ['source', 'downloads', 'score'], ['asc', 'desc', 'desc'])
+          break
+        default:
+          this.subtitlesList = this.subtitles.filter((subtitle) => {
+            return subtitle.source === source
+          })
+      }
+    },
+    downloadAll () {
+
     }
   },
   watch: {
+    subtitles: function (newVal, oldVal) {
+      this.sources = [...new Set(this.subtitles.map(s => s.source))]
+      // Filter list here
+      this.filterSubtitles('all')
+    },
     arrowNavEnter: function (newVal, oldVal) { // watch it
-      if (this.subtitles.length > 0 && this.arrowNavPosition >= 0) {
-        this.download(this.subtitles[this.arrowNavPosition])
+      if (this.subtitlesList.length > 0 && this.arrowNavPosition >= 0 && !this.actionFocused) {
+        this.download(this.subtitlesList[this.arrowNavPosition])
       }
     },
     arrowNavPosition: function (newVal, oldVal) {
-      var $container = this.$parent.$refs.container
+      var $container = this.$refs.containerSubtitlesScroll
       var containerHeight = $container.clientHeight
       var scrollTop = $container.scrollTop
       // console.log($container.scrollTop);
@@ -116,21 +175,66 @@ export default {
   computed: {
     calculateWidth: function (e) {
       return this.itemWidth
-    },
-    onlyAddic7ed: function () {
-      return this.subtitles.filter(function (sub) {
-        return sub.source === 'addic7ed'
-      })
-    },
-    orderedSubtitles: function () {
-      // _.orderBy(this.users, ['name', 'last_login'], ['asc', 'desc'])
-      return _.orderBy(this.subtitles, ['source', 'downloads', 'score'], ['asc', 'desc', 'desc'])
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+  .subtitles-wrapper {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .subtitles-container {
+    overflow: auto;
+    flex: 1;
+  }
+
+  .actionsBar {
+    display: flex;
+    padding: 0px 25px 10px;
+
+    .left {
+      margin-right: auto;
+      text-align: left;
+    }
+
+    .right {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .bar-item {
+      display: inline-block;
+      cursor: pointer;
+      color: $grey-color;
+      font-size: 13px;
+
+      &:not(:last-child)::after {
+        content: '|';
+        margin: 0 7px;
+      }
+
+      button {
+        position: relative;
+        border: none;
+        padding: 0;
+        white-space: nowrap;
+
+        &:hover, &:focus {
+          color: $darkgrey-color;
+        }
+
+        &.active::after {
+          border-bottom: 1px solid;
+        }
+      }
+    }
+  }
+
   .subtitles-list {
     overflow: hidden;
 

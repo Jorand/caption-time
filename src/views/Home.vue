@@ -11,7 +11,7 @@
     <SearchInput
       v-on:search-result="updateSubtitles"
       v-bind:remoteQuery="externalQuery" />
-    <div class="flex-content" ref="container">
+    <div class="flex-content home-content">
       <Subtitles
         v-bind:subtitles="subtitlesList"
         v-bind:arrowNavPosition="arrowNavPosition"
@@ -88,6 +88,6 @@ export default {
   }
   .home-content {
     flex: 1; /* takes the remaining height of the "container" div */
-    overflow: auto;
+    overflow: hidden;
   }
 </style>
