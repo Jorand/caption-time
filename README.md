@@ -1,4 +1,4 @@
-# Caption time
+# Caption time New!
 
 A while ago i made [Addic7ed bot](https://github.com/Jorand/addic7ed-bot) to get subtitle automatically from [Addic7ed](https://www.addic7ed.com/) when i was watching a show on Popcorn-Time.
 
