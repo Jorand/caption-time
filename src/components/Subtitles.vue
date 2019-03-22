@@ -24,8 +24,13 @@
 
 <script>
 import Caption from 'caption-core'
-import Languages from '@/lib/languages'
+import _ from 'lodash'
 const { shell } = require('electron')
+const { dialog } = require('electron').remote
+
+function uiError (msg, error) {
+  dialog.showErrorBox('Oops! Something went wrong', msg + ': ' + error)
+}
 
 export default {
   name: 'Subtitles',
@@ -37,8 +42,6 @@ export default {
   },
   methods: {
     download (subtitle) {
-      const { dialog } = require('electron').remote
-
       var filename = subtitle.name.replace(/ - /g, ' ').replace(/ /g, '.').replace(/.srt$|.str$/gi, '') + '-' + subtitle.langName + '.srt'
 
       const savePath = dialog.showOpenDialog({
@@ -60,9 +63,11 @@ export default {
               shell.showItemInFolder(path)
             }
           })
-          .catch(error => console.log('error', error))
+          .catch(error => {
+            uiError('Download failed', error)
+          })
       } catch (error) {
-        console.log('error', error)
+        uiError('Download failed', error)
       }
     },
     itemHover (e) {

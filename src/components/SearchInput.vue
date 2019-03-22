@@ -12,13 +12,11 @@
         @click.stop="reset">
       </button>
     </form>
-    <div class="event-toast">
-      <div class="loader" v-if="isLoading">
-        Searching…
-      </div>
-      <div class="nothing" v-if="nothingFound">
-        Nothing found !
-      </div>
+    <div class="event-toast loader" v-if="isLoading">
+      Searching…
+    </div>
+    <div class="event-toast nothing" v-if="nothingFound">
+      Nothing found !
     </div>
   </div>
 </template>
@@ -41,7 +39,9 @@ export default {
       isLoading: false,
       searchResult: [],
       arrowNavPosition: -1,
-      nothingFound: false
+      nothingFound: false,
+      online: false,
+      timeoutSearch: null
     }
   },
   methods: {
@@ -65,6 +65,10 @@ export default {
       if (e) e.preventDefault() // Prevent form submit
       if (!this.query) return // Do nothing empty query
 
+      this.isOnline()
+
+      if (!this.online) return
+
       // Use language in query or stored user setting language
       var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.language
 
@@ -75,7 +79,7 @@ export default {
       this.lastQuery = this.query
       this.nothingFound = false
 
-      const pushSubtitles = (subtitles) => {
+      const pushSubtitles = (subtitles, source) => {
         // add lang to subtitle object
         subtitles = subtitles.filter(function (item) {
           item.langCode = LANG
@@ -91,21 +95,28 @@ export default {
           item.hearingImpaired = item.subInfo ? item.subInfo.hearingImpaired : ''
           return item
         })
-        this.endLoader()
         this.searchResult = subtitles
-        this.nothingFound = this.searchResult.length < 1
+
+        if (source === 'completed') {
+          this.endLoader()
+        }
       }
+
+      clearTimeout(this.timeoutSearch);
+      this.timeoutSearch = setTimeout(() => {
+        this.endLoader()
+      }, 10000);
 
       Caption.searchByQuery(this.query, LANG, LIMIT)
         // All sources are checked.
         .on('fastest', subtitles => {
           // Fastest source has been checked.
           console.log('[INFO] Fastest search result:', subtitles)
-          pushSubtitles(subtitles)
+          pushSubtitles(subtitles, 'fastest')
         })
         .on('completed', subtitles => {
           console.log('[INFO] Completed search result:', subtitles)
-          pushSubtitles(subtitles)
+          pushSubtitles(subtitles, 'completed')
         })
     },
     reset () {
@@ -118,6 +129,8 @@ export default {
       this.isLoading = true
     },
     endLoader () {
+      clearTimeout(this.timeoutSearch);
+      this.nothingFound = this.searchResult.length < 1
       this.isLoading = false
     },
     onArrowDown (event) {
@@ -141,8 +154,37 @@ export default {
       } else if (this.query !== this.lastQuery) {
         this.searchSubtitles()
       }
-      // console.log('[INFO] On Enter')
-      this.$emit('arrow-enter', Date.now())
+      else {
+        this.$emit('arrow-enter', Date.now())
+      }
+    },
+    isOnline () {
+      var message = function () {
+        const { dialog } = require('electron').remote
+
+        return dialog.showMessageBox({
+          title: 'There\'s no internet',
+          message: 'No internet available, do you want to try again?',
+          type: 'warning',
+          buttons: ['Try again please', 'I don\'t want to work anyway'],
+          defaultId: 0
+        }, function (index) {
+          // if clicked "Try again please"
+          if (index === 0) {
+            this.searchSubtitles()
+          }
+        })
+      }
+
+      const execute = () => {
+        if (navigator.onLine) {
+          this.online = true
+        } else {
+          this.online = false
+          message()
+        }
+      }
+      execute()
     }
   },
   computed: {},
@@ -230,12 +272,9 @@ export default {
     }
 
     .event-toast {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 100%;
-      padding: 5px 25px;
       font-size: 14px;
+      padding-top: 5px;
+      display: inline-block;
     }
   }
 </style>
