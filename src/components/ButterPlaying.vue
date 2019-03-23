@@ -1,7 +1,8 @@
 <template>
-  <div class="butter-remote"
+  <div tabindex="0" class="butter-remote"
     :class="{active: isActive}"
-    @click.stop="toggle()"
+    @click.stop="toggle"
+    @keydown.enter.prevent="toggle"
     v-if="butterCurrentShow.title">
     <span class="player">Popcorn-Time Player</span>
     <p class="show-title">
@@ -17,7 +18,9 @@
         Episode {{ butterCurrentShow.tnp.episode }}
       </span>
     </p>
-    <button class="close" @click.stop="toggle()"></button>
+    <button class="close"
+      @click.stop="toggle"
+      @keydown.enter.prevent="toggle"></button>
   </div>
 </template>
 
@@ -38,8 +41,11 @@ export default {
     }
   },
   methods: {
-    toggle () {
+    toggle (event) {
+      if (event) event.stopPropagation()
+      console.log('toggle');
       this.isActive = !this.isActive
+      console.log(this.isActive);
       if (this.isActive && this.butterCurrentShow.query !== '') {
         this.$emit('title-playing', this.butterCurrentShow.query)
       } else {
@@ -110,6 +116,12 @@ export default {
       height: 80px;
     }
 
+    &:focus {
+      .player {
+        color: $darkgrey-color;
+      }
+    }
+
     .player {
       font-size: 12px;
       color: $acccentDark-color;
@@ -135,6 +147,7 @@ export default {
       background: transparent;
       border: none;
       display: none;
+      opacity: .5;
 
       &::after, &::before {
         content: '';
@@ -155,6 +168,10 @@ export default {
 
       &::before {
         transform: rotate(-45deg);
+      }
+
+      &:focus {
+        opacity: 1;
       }
     }
 
