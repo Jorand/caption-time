@@ -10,20 +10,13 @@
         @click.stop="reset">
       </button>
     </form>
-
-    <div class="event-toast loader" v-if="isLoading">
-      Searching…
-    </div>
-    <div class="event-toast nothing" v-if="nothingFound">
-      Nothing found !
-    </div>
   </div>
 </template>
 
 <script>
 import Caption from 'caption-core'
 import Languages from '@/lib/languages'
-
+import Network from '@/lib/network'
 // Number of subtitles returned.
 // Option: int|"all"|"best"
 const LIMIT = 10
@@ -39,7 +32,6 @@ export default {
       searchResult: [],
       tempSearchResult: [],
       nothingFound: false,
-      online: false,
       timeoutSearch: null
     }
   },
@@ -60,13 +52,11 @@ export default {
     updateSubtitles (subtitles) {
       this.$emit('search-result', subtitles)
     },
-    searchSubtitles (e) {
-      if (e) e.preventDefault() // Prevent form submit
+    searchSubtitles (event) {
+      if (event) event.preventDefault() // Prevent form submit
       if (!this.query) return // Do nothing empty query
 
-      this.isOnline()
-
-      if (!this.online) return
+      if (!Network.isOnline(this.searchSubtitles)) return
 
       // Use language in query or stored user setting language
       var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.language
@@ -145,38 +135,18 @@ export default {
       } else if (this.query !== this.lastQuery) {
         this.searchSubtitles()
       }
-    },
-    isOnline () {
-      var message = function () {
-        const { dialog } = require('electron').remote
-
-        return dialog.showMessageBox({
-          title: 'There\'s no internet',
-          message: 'No internet available, do you want to try again?',
-          type: 'warning',
-          buttons: ['Try again please', 'I don\'t want to work anyway'],
-          defaultId: 0
-        }, function (index) {
-          // if clicked "Try again please"
-          if (index === 0) {
-            this.searchSubtitles()
-          }
-        })
-      }
-
-      const execute = () => {
-        if (navigator.onLine) {
-          this.online = true
-        } else {
-          this.online = false
-          message()
-        }
-      }
-      execute()
     }
   },
   computed: {},
   watch: {
+    nothingFound: function (newVal, oldVal) {
+      // console.log('search nothingFound', newVal);
+      this.$emit('search-nothing-found', newVal)
+    },
+    isLoading: function (newVal, oldVal) {
+      // console.log('search loading', newVal);
+      this.$emit('search-loading', newVal)
+    },
     searchResult: function (newVal, oldVal) {
       // console.log('[WATCH] Search result:', newVal, '| was:', oldVal)
       this.updateSubtitles(this.searchResult)
@@ -253,12 +223,6 @@ export default {
       &:hover, &:focus {
         color: black;
       }
-    }
-
-    .event-toast {
-      font-size: 14px;
-      padding-top: 5px;
-      display: inline-block;
     }
   }
 </style>
