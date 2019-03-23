@@ -18,11 +18,11 @@ function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
     width: 390, // 450
-    height: 480, // 350
+    height: 500, // 350
     minWidth: 350,
-    minHeight: 350,
-    titleBarStyle: "hiddenInset",
-    opacity: 1 //0.98
+    minHeight: 400,
+    titleBarStyle: 'hiddenInset',
+    opacity: 1 // 0.98
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -64,12 +64,12 @@ app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
-      await installVueDevtools();
+      await installVueDevtools()
     } catch (e) {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-  createWindow();
+  createWindow()
 })
 
 // Exit cleanly on request from parent process in development mode.
@@ -87,19 +87,18 @@ if (isDevelopment) {
   }
 }
 
-if (process.platform == 'darwin') {
-
+if (process.platform === 'darwin') {
   const setTheme = () => {
-    let theme = systemPreferences.isDarkMode() ? 'dark' : 'light';
+    let theme = systemPreferences.isDarkMode() ? 'dark' : 'light'
 
-    console.log("theme :", theme);
-    //updateMyAppTheme(systemPreferences.isDarkMode())
+    console.log('theme :', theme)
+    // updateMyAppTheme(systemPreferences.isDarkMode())
   }
 
   systemPreferences.subscribeNotification(
     'AppleInterfaceThemeChangedNotification',
     setTheme
-  );
+  )
 
-  setTheme();
+  setTheme()
 }

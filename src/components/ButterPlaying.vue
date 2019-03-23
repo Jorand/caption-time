@@ -43,9 +43,7 @@ export default {
   methods: {
     toggle (event) {
       if (event) event.stopPropagation()
-      console.log('toggle');
       this.isActive = !this.isActive
-      console.log(this.isActive);
       if (this.isActive && this.butterCurrentShow.query !== '') {
         this.$emit('title-playing', this.butterCurrentShow.query)
       } else {

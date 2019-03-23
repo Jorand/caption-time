@@ -17,7 +17,7 @@
             @blur="actionFocused = false">All</button>
         </li>
         <li class="bar-item" v-bind:key="`source-${i}`"
-          v-if="sources.length > 1"
+          v-show="sources.length > 1"
           v-for="(source, i) in sources">
           <button type="button" name="filter"
             :class="{active: activeFilter === source}"
@@ -141,8 +141,8 @@ export default {
           break
         default:
           this.subtitlesList = _.orderBy(this.subtitles.filter((subtitle) => {
-              return subtitle.source === source
-            }), ['downloads', 'score'], ['desc', 'desc'])
+            return subtitle.source === source
+          }), ['downloads', 'score'], ['desc', 'desc'])
       }
     },
     downloadAll () {
