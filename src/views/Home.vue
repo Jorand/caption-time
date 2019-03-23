@@ -4,7 +4,12 @@
     @blur="blur"
     @keydown.down="onArrowDown"
     @keydown.up="onArrowUp"
-    @keydown.enter="onEnter">
+    @keydown.enter="onEnter"
+    :class="{hover: dragover}"
+    @drop.prevent="loadFiles"
+    @dragend.prevent
+    @dragover.prevent="dragOverHandler"
+    @dragleave.prevent="dragOverHandler">
     <ButterPlaying
       v-if="butterRemoteIsEnable"
       v-on:title-playing="searchFromButter"
@@ -30,6 +35,7 @@ import { mapGetters } from 'vuex'
 import SearchInput from '@/components/SearchInput.vue'
 import Subtitles from '@/components/Subtitles.vue'
 import ButterPlaying from '@/components/ButterPlaying.vue'
+import Caption from 'caption-core'
 
 export default {
   name: 'Home',
@@ -46,7 +52,9 @@ export default {
       arrowNavEnter: 0,
       newButterSettings: {},
       search_isLoading: false,
-      search_nothingFound: false
+      search_nothingFound: false,
+      dragover: false,
+      filePaths: []
     }
   },
   methods: {
@@ -90,6 +98,53 @@ export default {
     },
     searchNothingFound (value) {
       this.search_nothingFound = value
+    },
+    dragOverHandler (event) {
+      event.preventDefault()
+      this.dragover = event.type === 'dragover'
+    },
+    loadFiles (event) {
+      console.log('File(s) dropped')
+      event.preventDefault()
+      this.dragover = false
+      if (event.dataTransfer.items) {
+        // Use DataTransferItemList interface to access the file(s)
+        for (var i = 0; i < event.dataTransfer.items.length; i++) {
+          // If dropped items aren't files, reject them
+          if (event.dataTransfer.items[i].kind === 'file') {
+            var file = event.dataTransfer.items[i].getAsFile()
+            console.log('... file[' + i + '].name = ' + file.name)
+            console.log(file)
+            this.filePaths.push({
+              filename: file.name,
+              path: file.path
+            })
+          }
+        }
+      } else {
+        // Use DataTransfer interface to access the file(s)
+        for (var j = 0; j < event.dataTransfer.files.length; j++) {
+          const file = event.dataTransfer.files[j]
+          console.log('... file[' + j + '].name = ' + file.name)
+          this.filePaths.push({
+            filename: file.name,
+            path: file.path
+          })
+        }
+      }
+      console.log(this.filePaths[0].filename)
+      this.externalQuery = this.filePaths[0].filename
+      this.filePaths = []
+      // var LANG = this.$store.state.userSettings.language
+      // console.log(this.filePaths, LANG)
+      // Caption.searchByFiles(
+      //   this.filePaths,
+      //   LANG,
+      //   'best'
+      // ).on('completed', subtitles => {
+      //   console.log(subtitles)
+      //   this.updateSubtitles(subtitles)
+      // })
     }
   },
   computed: {
@@ -103,6 +158,10 @@ export default {
 <style lang="scss" scoped>
   .home {
     position: relative;
+
+    &.hover {
+      background-color: rgba(0,0,0,0.2);
+    }
   }
   .home-content {
     flex: 1; /* takes the remaining height of the "container" div */
