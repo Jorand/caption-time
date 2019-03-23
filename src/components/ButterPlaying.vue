@@ -95,7 +95,7 @@ export default {
     position: relative;
     margin: 0 13px;
     margin-top: 2px;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
     height: 25px;
     background-color: $accent-color;
     border-radius: 5px;
@@ -106,8 +106,8 @@ export default {
     z-index: 1;
 
     &.active {
-      margin-bottom: -60px;
-      height: 90px;
+      margin-bottom: -53px;
+      height: 80px;
     }
 
     .player {
