@@ -1,6 +1,12 @@
 <template>
   <div class="subtitles-wrapper">
-    <div class="actionsBar">
+    <div class="event-toast loader" v-if="isLoading">
+      Searching…
+    </div>
+    <div class="event-toast nothing" v-if="nothingFound">
+      Nothing found !
+    </div>
+    <div class="actionsBar" v-if="subtitlesList.length">
       <ul class="left">
         <li class="bar-item">
           <button type="button" name="show-all"
@@ -61,6 +67,7 @@
 <script>
 import Caption from 'caption-core'
 import _ from 'lodash'
+import Network from '@/lib/network'
 const { shell } = require('electron')
 const remote = require('electron').remote
 const { dialog, app } = remote
@@ -72,26 +79,30 @@ function uiError (msg, error) {
 
 export default {
   name: 'Subtitles',
-  props: ['subtitles', 'arrowNavPosition', 'arrowNavEnter'],
+  props: ['subtitles', 'arrowNavPosition', 'arrowNavEnter', 'search_isLoading', 'nothingFound'],
   data () {
     return {
       itemWidth: 0,
       subtitlesList: [],
       sources: [],
       actionFocused: false,
-      activeFilter: 'all'
+      activeFilter: 'all',
+      isLoading: false
     }
   },
   methods: {
-    notification: (message, savePath) => {
+    notification: (message, saveFolder) => {
+      console.log('[NOTIF]', message, saveFolder)
       const myNotification = new Notification(app.getName(), {
         body: message
       })
       myNotification.onclick = () => {
-        shell.showItemInFolder(savePath)
+        console.log(saveFolder)
+        shell.showItemInFolder(saveFolder)
       }
     },
     download (subtitle) {
+      if (!Network.isOnline(() => { this.download(subtitle) })) return
       const hasExtension = subtitle.name.includes('.srt')
       let filename = hasExtension ? subtitle.name.replace(/.srt$|.str$/gi, '') : subtitle.name
       filename = `${filename}-${subtitle.langName}.srt`
@@ -134,10 +145,58 @@ export default {
       }
     },
     downloadAll () {
-
+      if (this.subtitlesList.length < 1) return
+      if (!Network.isOnline(this.downloadAll)) return
+      const mainWindow = remote.getCurrentWindow()
+      let saveFolder = dialog.showOpenDialog(mainWindow, {
+        title: 'Download',
+        properties: ['openDirectory']
+      })
+      if (!saveFolder) return
+      saveFolder = saveFolder[0]
+      this.isLoading = true
+      let counter = 0
+      const endDownload = (force = false, filePath = '') => {
+        if (counter >= this.subtitlesList.length - 1 || force) {
+          clearTimeout(timeoutDownload)
+          this.isLoading = false
+          if (counter < 1) {
+            uiError('Download failed', 'Timeout')
+          } else {
+            this.notification(`${counter ? counter + 1 : 0} files successfully downloaded!`, filePath || saveFolder)
+          }
+        }
+        counter++
+      }
+      let timeoutDownload = setTimeout(() => {
+        endDownload(true)
+      }, 10000)
+      try {
+        this.subtitlesList.map((subtitle, index) => {
+          const hasExtension = subtitle.name.includes('.srt')
+          let filename = hasExtension ? subtitle.name.replace(/.srt$|.str$/gi, '') : subtitle.name
+          filename = `${filename}-${subtitle.langName}.srt`
+          var savePath = `${saveFolder}/${filename}`
+          Caption.download(subtitle, subtitle.source, savePath)
+            .then(() => {
+              endDownload(false, savePath)
+            })
+            .catch(err => {
+              // console.log('[ERROR] download:', err)
+              this.isLoading = false
+              uiError('Download failed', err)
+            })
+        })
+      } catch (error) {
+        this.isLoading = false
+        uiError('Download failed', error)
+      }
     }
   },
   watch: {
+    search_isLoading: function (newVal, oldVal) {
+      this.isLoading = newVal
+    },
     subtitles: function (newVal, oldVal) {
       this.sources = [...new Set(this.subtitles.map(s => s.source))]
       // Filter list here
@@ -154,7 +213,7 @@ export default {
       var scrollTop = $container.scrollTop
       // console.log($container.scrollTop);
 
-      if (newVal < 0) {
+      if (newVal < 0 || this.$refs.item.length < 1) {
         $container.scrollTop = 0
         return
       }
@@ -171,7 +230,8 @@ export default {
       }
     }
   },
-  mounted () {},
+  mounted () {
+  },
   computed: {
     calculateWidth: function (e) {
       return this.itemWidth
@@ -224,15 +284,18 @@ export default {
         padding: 0;
         white-space: nowrap;
 
-        &:hover, &:focus {
+        &:hover, &:focus, &.active {
           color: $darkgrey-color;
         }
 
-        &.active::after {
-          border-bottom: 1px solid;
-        }
       }
     }
+  }
+
+  .event-toast {
+    font-size: 14px;
+    padding-top: 5px;
+    display: inline-block;
   }
 
   .subtitles-list {
