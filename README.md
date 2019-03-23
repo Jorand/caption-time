@@ -59,6 +59,7 @@ npm run lint
 * [Popcorn time Api](https://github.com/liszd/Popcorn-Time-Desktop/blob/master/docs/json-rpc-api.md)
 * [Remote Popcorn-Time](https://github.com/MickdeGraaf/popcorn-time-remote)
 * [Node Butter Remote](https://github.com/ThaTiemsz/butter-remote)
+* [How To Make Your Electron App Sexy](https://blog.dcpos.ch/how-to-make-your-electron-app-sexy)
 
 
 ## Troubleshooting

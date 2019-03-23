@@ -10,14 +10,18 @@
   },
   "license": "MIT",
   "productName": "Caption Time",
-  "repository": "Jorand/caption-time",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jorand/caption-time"
+  },
   "main": "background.js",
   "scripts": {
-    "serve": "vue-cli-service serve --mode development",
-    "build": "vue-cli-service build --mode production",
+    "serve": "vue-cli-service serve",
+    "build": "npm run electron:build",
+    "test": "IS_TEST='true' npm run electron:build",
     "lint": "vue-cli-service lint",
-    "electron:build": "vue-cli-service electron:build --mode production",
-    "electron:serve": "vue-cli-service electron:serve --mode development",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "start": "npm run electron:serve"
@@ -25,7 +29,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "caption-core": "^2.2.0-beta1",
-    "electron": "^4.0.0",
+    "electron-is-dev": "^1.0.1",
     "iconv-lite": "^0.4.24",
     "rimraf": "^2.6.3",
     "torrent-name-parser": "^0.6.5",
@@ -45,6 +49,7 @@
     "autoprefixer": "^9.5.0",
     "babel-eslint": "^10.0.1",
     "core-js": "^2.6.5",
+    "electron": "^4.0.0",
     "electron-builder": "^20.39.0",
     "eslint": "^5.8.0",
     "eslint-plugin-import": "^2.16.0",

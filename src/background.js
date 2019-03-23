@@ -8,6 +8,9 @@ import {
 } from 'vue-cli-plugin-electron-builder/lib'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+console.time('init')
+process.argv.forEach(onOpen)
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -28,7 +31,7 @@ function createWindow () {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    // if (!process.env.IS_TEST) mainWindow.webContents.openDevTools()
+    if (!process.env.IS_TEST) mainWindow.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
@@ -40,8 +43,20 @@ function createWindow () {
     app.exit()
     app.quit()
   })
+
+  require('./menu')
+
   mainWindow.setProgressBar(-1)
+  console.timeEnd('init')
 }
+
+app.on('open-file', onOpen)
+app.on('open-url', onOpen)
+
+app.on('will-finish-launching', function () {
+  // crashReporter.init()
+  // autoUpdater.init()
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -104,4 +119,20 @@ if (process.platform === 'darwin') {
   )
 
   setTheme()
+}
+
+function onOpen (e, torrentId) {
+  // e.preventDefault()
+  console.log(e, torrentId)
+  if (app.ipcReady) {
+    // windows.main.send('dispatch', 'onOpen', torrentId)
+    // Magnet links opened from Chrome won't focus the app without a setTimeout. The
+    // confirmation dialog Chrome shows causes Chrome to steal back the focus.
+    // Electron issue: https://github.com/atom/electron/issues/4338
+    // setTimeout(function () {
+    //   windows.focusWindow(windows.main)
+    // }, 100)
+  } else {
+    // argv.push(torrentId)
+  }
 }

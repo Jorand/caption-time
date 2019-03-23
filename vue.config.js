@@ -6,6 +6,15 @@ module.exports = {
     'style-resources-loader': {
       preProcessor: 'scss',
       patterns: [path.resolve(__dirname, './src/styles/global.scss')]
+    },
+    electronBuilder: {
+      // removeElectronJunk: false,
+      builderOptions: {
+        'fileAssociations': {
+          'ext': ['mkv', 'avi', 'mp4'],
+          'name': 'Movies'
+        }
+      }
     }
   },
   configureWebpack: config => {

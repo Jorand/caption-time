@@ -1,6 +1,41 @@
-const { app, Menu } = require('electron')
+const { app, Menu, shell } = require('electron')
+const isDev = require('electron-is-dev')
+const packageJson = require('../package.json')
+const electron = require('electron')
 
 const template = [
+  // ...(process.platform === 'darwin' ? [{
+  //   label: app.getName(),
+  //   submenu: [
+  //     { role: 'about' },
+  //     { type: 'separator' },
+  //     { role: 'services' },
+  //     { type: 'separator' },
+  //     { role: 'hide' },
+  //     { role: 'hideothers' },
+  //     { role: 'unhide' },
+  //     { type: 'separator' },
+  //     { role: 'quit' }
+  //   ]
+  // }] : []),
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open File...',
+        accelerator: 'CmdOrCtrl+O',
+        click: (menuItem, browserWindow, event) => {
+          if (browserWindow) {
+            browserWindow.webContents.send('openFile', '')
+          } else {
+            var focusedWindow = electron.BrowserWindow.getFocusedWindow()
+            focusedWindow.show()
+            focusedWindow.webContents.send('openFile', '')
+          }
+        }
+      }
+    ]
+  },
   {
     label: 'Edit',
     submenu: [
@@ -11,13 +46,30 @@ const template = [
       { role: 'copy' },
       { role: 'paste' },
       { role: 'pasteandmatchstyle' },
+      {
+        label: 'Speech',
+        submenu: [
+          { role: 'startspeaking' },
+          { role: 'stopspeaking' }
+        ]
+      },
       { role: 'delete' },
       { role: 'selectall' }
     ]
   },
   {
     label: 'View',
-    submenu: [
+    submenu: isDev ? [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' }
+    ] : [
       { role: 'reload' },
       { role: 'forcereload' },
       { role: 'toggledevtools' },
@@ -40,8 +92,29 @@ const template = [
     role: 'help',
     submenu: [
       {
+        label: 'Donate',
+        click: () => {
+          shell.openExternal('https://www.paypal.me/jorandlepape')
+          // analytics Donated
+        }
+      },
+      {
         label: 'Learn More',
-        click () { require('electron').shell.openExternal('https://electronjs.org') }
+        click () { shell.openExternal(packageJson.repository.url) }
+      },
+      {
+        label: 'Support',
+        click: () => shell.openExternal('https://twitter.com/jorandlepape')
+      },
+      {
+        label: 'Report Issue',
+        click: () =>
+          shell.openExternal(packageJson.repository.url + '/issues/new')
+      },
+      {
+        label: 'Search Issues',
+        click: () =>
+          shell.openExternal(packageJson.repository.url + '/issues')
       }
     ]
   }
