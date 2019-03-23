@@ -1,7 +1,7 @@
 <template>
   <div class="subtitles-wrapper">
     <div class="event-toast loader" v-if="isLoading">
-      Searching…
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
     <div class="event-toast nothing" v-if="nothingFound">
       Nothing found !
@@ -242,6 +242,7 @@ export default {
 
 <style lang="scss" scoped>
   .subtitles-wrapper {
+    position: relative;
     height: 100%;
     overflow: hidden;
     display: flex;
@@ -256,6 +257,7 @@ export default {
   .actionsBar {
     display: flex;
     padding: 0px 25px 10px;
+    height: 28px;
 
     .left {
       margin-right: auto;
@@ -293,9 +295,15 @@ export default {
   }
 
   .event-toast {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: $bg-color;
     font-size: 14px;
-    padding-top: 5px;
-    display: inline-block;
+    display: block;
+    height: 28px;
   }
 
   .subtitles-list {

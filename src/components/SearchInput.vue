@@ -221,7 +221,7 @@ export default {
       color: $grey-color;
 
       &:hover, &:focus {
-        color: black;
+        color: $text-color;
       }
     }
   }

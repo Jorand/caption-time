@@ -41,8 +41,8 @@ export default {
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-    background-color: #fff; // #303133, #1c1e23
-    color: #000;
+    background-color: $bg-color; // #303133, #1c1e23
+    color: $text-color;
   }
 
   .flex-container {
