@@ -72,10 +72,15 @@ import Network from '@/lib/network'
 const { shell } = require('electron')
 const remote = require('electron').remote
 const { dialog, app } = remote
+const mainWindow = remote.getCurrentWindow()
 
 function uiError (msg, error) {
   console.log(error)
   dialog.showErrorBox('Oops! Something went wrong', msg + ': ' + error)
+}
+
+function map (val, inMin, inMax, outMin, outMax) {
+  return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
 }
 
 export default {
@@ -107,7 +112,6 @@ export default {
       const hasExtension = subtitle.name.includes('.srt')
       let filename = hasExtension ? subtitle.name.replace(/.srt$|.str$/gi, '') : subtitle.name
       filename = `${filename}-${subtitle.langName}.srt`
-      const mainWindow = remote.getCurrentWindow()
       const savePath = dialog.showSaveDialog(mainWindow, {
         title: 'Download',
         properties: ['openDirectory'],
@@ -148,7 +152,6 @@ export default {
     downloadAll () {
       if (this.subtitlesList.length < 1) return
       if (!Network.isOnline(this.downloadAll)) return
-      const mainWindow = remote.getCurrentWindow()
       let saveFolder = dialog.showOpenDialog(mainWindow, {
         title: 'Download',
         properties: ['openDirectory']
@@ -156,14 +159,19 @@ export default {
       if (!saveFolder) return
       saveFolder = saveFolder[0]
       this.isLoading = true
+      mainWindow.setProgressBar(0)
       let counter = 0
       const endDownload = (force = false, filePath = '') => {
+        var p = map(counter + 1, 0, this.subtitlesList.length - 1, 0, 1)
+        mainWindow.setProgressBar(p)
         if (counter >= this.subtitlesList.length - 1 || force) {
           clearTimeout(timeoutDownload)
           this.isLoading = false
+          mainWindow.setProgressBar(-1)
           if (counter < 1) {
             uiError('Download failed', 'Timeout')
           } else {
+            mainWindow.setProgressBar(-1)
             this.notification(`${counter ? counter + 1 : 0} files successfully downloaded!`, filePath || saveFolder)
           }
         }
@@ -258,7 +266,7 @@ export default {
   .actionsBar {
     display: flex;
     padding: 0px 25px 10px;
-    height: 28px;
+    min-height: 28px;
 
     .left {
       margin-right: auto;
