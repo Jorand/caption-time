@@ -4,20 +4,6 @@ const packageJson = require('../package.json')
 const electron = require('electron')
 
 const template = [
-  // ...(process.platform === 'darwin' ? [{
-  //   label: app.getName(),
-  //   submenu: [
-  //     { role: 'about' },
-  //     { type: 'separator' },
-  //     { role: 'services' },
-  //     { type: 'separator' },
-  //     { role: 'hide' },
-  //     { role: 'hideothers' },
-  //     { role: 'unhide' },
-  //     { type: 'separator' },
-  //     { role: 'quit' }
-  //   ]
-  // }] : []),
   {
     label: 'File',
     submenu: [
@@ -136,26 +122,26 @@ if (process.platform === 'darwin') {
     ]
   })
 
-  // Edit menu
-  template[1].submenu.push(
-    { type: 'separator' },
-    {
-      label: 'Speech',
-      submenu: [
-        { role: 'startspeaking' },
-        { role: 'stopspeaking' }
-      ]
-    }
-  )
-
-  // Window menu
-  template[3].submenu = [
-    { role: 'close' },
-    { role: 'minimize' },
-    { role: 'zoom' },
-    { type: 'separator' },
-    { role: 'front' }
-  ]
+  // // Edit menu
+  // template[1].submenu.push(
+  //   { type: 'separator' },
+  //   {
+  //     label: 'Speech',
+  //     submenu: [
+  //       { role: 'startspeaking' },
+  //       { role: 'stopspeaking' }
+  //     ]
+  //   }
+  // )
+  //
+  // // Window menu
+  // template[3].submenu = [
+  //   { role: 'close' },
+  //   { role: 'minimize' },
+  //   { role: 'zoom' },
+  //   { type: 'separator' },
+  //   { role: 'front' }
+  // ]
 }
 
 const menu = Menu.buildFromTemplate(template)
