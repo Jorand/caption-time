@@ -112,6 +112,16 @@ if (process.platform === 'darwin') {
     submenu: [
       { role: 'about' },
       { type: 'separator' },
+      {
+        label: 'Preferences...',
+        accelerator: 'CmdOrCtrl+,',
+        click: (menuItem, browserWindow, event) => {
+          var focusedWindow = browserWindow || electron.BrowserWindow.getFocusedWindow()
+          focusedWindow.show()
+          focusedWindow.webContents.send('openUserSettings', '')
+        }
+      },
+      { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
       { role: 'hide' },

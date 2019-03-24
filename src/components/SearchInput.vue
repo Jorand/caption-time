@@ -181,7 +181,7 @@ export default {
   },
   mounted () {
     electron.ipcRenderer.on('openFile', (event, file) => {
-      console.log(event, file)
+      console.log('openFile', file)
       this.openFile(file)
     })
 

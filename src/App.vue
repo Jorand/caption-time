@@ -15,6 +15,7 @@
 <script>
 import TheTitleBar from '@/components/TheTitleBar.vue'
 import TheFooterBar from '@/components/TheFooterBar.vue'
+const electron = require('electron')
 
 export default {
   name: 'app',
@@ -26,6 +27,12 @@ export default {
     return {
       theme: 'dark'
     }
+  },
+  mounted () {
+    electron.ipcRenderer.on('openUserSettings', (event, message) => {
+      console.log('openUserSettings', message)
+      this.$router.push('settings')
+    })
   }
 }
 </script>

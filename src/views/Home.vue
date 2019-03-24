@@ -35,7 +35,6 @@ import { mapGetters } from 'vuex'
 import SearchInput from '@/components/SearchInput.vue'
 import Subtitles from '@/components/Subtitles.vue'
 import ButterPlaying from '@/components/ButterPlaying.vue'
-import Caption from 'caption-core'
 
 export default {
   name: 'Home',
@@ -114,7 +113,6 @@ export default {
           if (event.dataTransfer.items[i].kind === 'file') {
             var file = event.dataTransfer.items[i].getAsFile()
             console.log('... file[' + i + '].name = ' + file.name)
-            console.log(file)
             this.filePaths.push({
               filename: file.name,
               path: file.path

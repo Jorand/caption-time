@@ -3,7 +3,7 @@
     <div class="left"></div>
     <h1 class="title">{{ appName }}</h1>
     <div class="right">
-      <SelectLanguage class="right" />
+      <SelectLanguage class="right" v-if="currentRouteName === 'home'" />
     </div>
   </header>
 </template>
@@ -19,13 +19,19 @@ export default {
   },
   data () {
     return {
-      appName: remote.app.getName()
+      appName: remote.app.getName(),
+      currentRouteName: ''
     }
   },
   mounted () {
     var toolbarRect = document.getElementById('toolbar').getBoundingClientRect()
     var win = remote.getCurrentWindow()
     win.setSheetOffset(toolbarRect.height)
+  },
+  watch: {
+    '$route' (to, from) {
+      this.currentRouteName = this.$route.name
+    }
   }
 }
 </script>
