@@ -127,7 +127,7 @@ export default {
     endLoader () {
       this.searchResult = this.tempSearchResult
       clearTimeout(this.timeoutSearch)
-      this.nothingFound = this.searchResult.length < 1
+      this.nothingFound = this.searchResult.length < 1 ? this.query : false
       this.isLoading = false
     },
     onEnter (event) {

@@ -5,6 +5,7 @@
     </div>
     <div class="event-toast nothing" v-if="nothingFound">
       Nothing found !
+      <a href="" @click.prevent="subtitlecat">Try subtitlecat</a>
     </div>
     <div class="actionsBar" v-if="subtitlesList.length">
       <ul class="left">
@@ -200,6 +201,9 @@ export default {
         this.isLoading = false
         uiError('Download failed', error)
       }
+    },
+    subtitlecat () {
+      shell.openExternal(`http://ww.subtitlecat.com/index.php?search=${this.nothingFound}`)
     }
   },
   watch: {
