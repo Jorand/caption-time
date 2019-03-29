@@ -78,6 +78,7 @@ export default function ({
               return result.title ? result : call('getloading', false)
             })
             .then((data) => {
+              // console.log(data)
               if (data !== false) {
                 const result = isShowPlaying(data)
                 if (result.title) {
@@ -88,6 +89,7 @@ export default function ({
                   }
                 } else {
                   publish('playingtitle', {})
+                  lastTitle = ''
                 }
               }
             })
@@ -212,8 +214,8 @@ export default function ({
     return error
   }
 
-  const log = (msg) => {
-    if (debug === true) console.log(msg)
+  const log = (...messages) => {
+    if (debug === true) console.log(...messages)
   }
 
   // Publish / Subscribe
