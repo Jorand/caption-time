@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     userSettings: {
+      uiLanguage: '',
       language: 'eng',
       butter: {
         enable: true,
@@ -34,6 +35,11 @@ export default new Vuex.Store({
     },
     butterRemoteSettings: (state) => {
       return state.userSettings.butter
+    },
+    uiLanguage: (state) => {
+      var data = localStorage.getItem('ui-language') || state.userSettings.uiLanguage
+      state.userSettings.uiLanguage = data
+      return data
     }
   },
   mutations: {
@@ -51,6 +57,11 @@ export default new Vuex.Store({
     },
     setButterRemoteSettings: (state, params) => {
       state.userSettings.butter = params
+    },
+    setUILanguage: (state, lang) => {
+      state.userSettings.uiLanguage = lang
+      localStorage.setItem('ui-language', lang)
+      console.log('[INFO] UI Language saved: ', lang)
     }
   },
   actions: {

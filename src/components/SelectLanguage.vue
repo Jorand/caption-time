@@ -104,7 +104,7 @@ export default {
     }
 
     .input-select:focus + label::after {
-      color: $darkgrey-color;
+      color: $black-color;
     }
   }
 </style>

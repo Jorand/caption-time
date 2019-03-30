@@ -116,7 +116,7 @@ export default {
 
     &:focus {
       .player {
-        color: $darkgrey-color;
+        color: $black-color;
       }
     }
 

@@ -300,7 +300,7 @@ export default {
         white-space: nowrap;
 
         &:hover, &:focus, &.active {
-          color: $darkgrey-color;
+          color: $black-color;
         }
 
       }

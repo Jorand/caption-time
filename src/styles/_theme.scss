@@ -2,8 +2,9 @@
 $accent-color: #0CF7B7;
 $acccentDark-color: #05684d;
 $grey-color: #ABB2BE;
+$darkgrey-color: #808080;
 $lightgrey-color: #f2f2f2;
-$darkgrey-color: #000000;
+$black-color: #000000;
 $text-color: #000000;
 $bg-color: #fff;
 
@@ -31,7 +32,7 @@ $bg-color: #fff;
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: $darkgrey-color;
+  background: $black-color;
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
 .lds-ellipsis div:nth-child(1) {
