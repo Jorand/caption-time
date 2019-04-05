@@ -1,7 +1,7 @@
 <template>
   <div class="select-container">
       <select id="subtitleLanguage" class="input-select"
-        v-model="selectedValue" @change="setUserLanguage($event.target.value)">
+        :value="language" @change="setUserLanguage($event.target.value)">
         <option v-for="lang in languages"
           :key="lang.code"
           :value="lang.code">
@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import Languages from '@/lib/languages'
 
 export default {
@@ -24,18 +24,18 @@ export default {
       selectedValue: ''
     }
   },
-  mounted () {
-    this.selectedValue = this.userLanguageCode
-  },
+  mounted () {},
   methods: {
     setUserLanguage (val) {
-      this.$store.commit('setUserLanguage', this.selectedValue)
+      this.$store.commit('setUserLanguage', val)
     }
   },
   computed: {
+    ...mapState({
+      language: state => state.userSettings.language
+    }),
     ...mapGetters([
-      'userLanguageName',
-      'userLanguageCode'
+      'userLanguageName'
     ])
   },
   watch: {}
