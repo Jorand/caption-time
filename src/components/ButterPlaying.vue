@@ -6,12 +6,13 @@
     v-if="butterCurrentShow.title">
     <span class="player">Popcorn-Time Player</span>
     <p class="show-title">
-      {{ butterCurrentShow.tnp.title }}
-      <span class="details"
-        v-if="butterCurrentShow.tnp.episodeName">
-        ({{ butterCurrentShow.tnp.episodeName }})
-      </span>
-      <br>
+      <a class="ellipsis">
+        {{ butterCurrentShow.tnp.title }}
+        <span class="details"
+          v-if="butterCurrentShow.tnp.episodeName">
+          ({{ butterCurrentShow.tnp.episodeName }})
+        </span>
+      </a>
       <span class="details"
         v-if="butterCurrentShow.isShow">
         Season {{ butterCurrentShow.tnp.season }} -
@@ -134,6 +135,13 @@ export default {
         font-size: 14px;
         font-weight: normal;
       }
+    }
+
+    .ellipsis {
+      display: block;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .close {
