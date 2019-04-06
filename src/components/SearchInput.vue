@@ -142,19 +142,26 @@ export default {
       }
     },
     openFile (file) {
-      console.log(file)
+      // console.log(file)
       if (!mainWindow) return
       var opts = {
         title: 'Select a file.',
         filters: [{ name: 'Movie File', extensions: ['mkv', 'avi', 'mp4'] }],
         properties: [ 'openFile' ]
       }
-      dialog.showOpenDialog(mainWindow, opts, function (selectedPaths) {
+      dialog.showOpenDialog(mainWindow, opts, (selectedPaths) => {
         console.log(selectedPaths)
-        if (!Array.isArray(selectedPaths)) return
-        selectedPaths.forEach(function (selectedPath) {
-
-        })
+        if (selectedPaths) {
+          var fileName = selectedPaths[0].replace(/^.*[\\\/]/, '')
+          console.log(fileName)
+          this.query = fileName
+          this.searchSubtitles()
+          this.$emit('search-file', fileName)
+        }
+        // if (!Array.isArray(selectedPaths)) return
+        // selectedPaths.forEach(function (selectedPath) {
+        //
+        // })
       })
     }
   },

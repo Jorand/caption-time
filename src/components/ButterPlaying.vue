@@ -32,7 +32,7 @@ let Butter = {}
 
 export default {
   name: 'ButterRemote',
-  props: ['updateButterSettings'],
+  props: ['remoteClose'],
   data () {
     return {
       isActive: true,
@@ -94,8 +94,10 @@ export default {
     })
   },
   watch: {
-    updateButterSettings: function (newVal, oldVal) { // watch it
-      Butter.updateSettings(newVal)
+    remoteClose: function (newVal, oldVal) {
+      if (newVal) {
+        this.isActive = false
+      }
     }
   },
   destroyed () {

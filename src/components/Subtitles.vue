@@ -274,6 +274,10 @@ export default {
     flex: 1;
   }
 
+  .hover .subtitles-container {
+    // box-shadow: inset 0px 0px 40px -10px $grey-color;
+  }
+
   .actionsBar {
     display: flex;
     padding: 0px 25px 10px;

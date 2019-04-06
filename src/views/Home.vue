@@ -13,11 +13,12 @@
     <ButterPlaying
       v-if="butterIsEnable"
       v-on:title-playing="searchFromButter"
-      v-bind:updateButterSettings="newButterSettings" />
+      v-bind:remoteClose="butterClose" />
     <SearchInput
       v-on:search-result="updateSubtitles"
       v-on:search-loading="searchIsLoading"
       v-on:search-nothing-found="searchNothingFound"
+      v-on:search-file="searchFile"
       v-bind:remoteQuery="externalQuery" />
     <div class="flex-content home-content">
       <Subtitles
@@ -49,11 +50,11 @@ export default {
       externalQuery: '',
       arrowNavPosition: -1,
       arrowNavEnter: 0,
-      newButterSettings: {},
       search_isLoading: false,
       search_nothingFound: false,
       dragover: false,
-      filePaths: []
+      filePaths: [],
+      butterClose: false
     }
   },
   methods: {
@@ -62,6 +63,7 @@ export default {
       // this.subtitles = [...this.subtitles, result];
       this.arrowNavPosition = -1
       this.subtitlesList = subtitles
+      this.externalQuery = ''
     },
     searchFromButter (title) {
       this.externalQuery = title
@@ -102,6 +104,9 @@ export default {
       event.preventDefault()
       this.dragover = event.type === 'dragover'
     },
+    searchFile (value) {
+      this.butterClose = value
+    },
     loadFiles (event) {
       console.log('File(s) dropped')
       event.preventDefault()
@@ -132,6 +137,8 @@ export default {
       }
       console.log(this.filePaths[0].filename)
       this.externalQuery = this.filePaths[0].filename
+      this.butterClose = Date.now()
+
       this.filePaths = []
       // var LANG = this.$store.state.userSettings.language
       // console.log(this.filePaths, LANG)
@@ -158,7 +165,7 @@ export default {
     position: relative;
 
     &.hover {
-      background-color: rgba(0,0,0,0.2);
+
     }
   }
   .home-content {
