@@ -5,7 +5,7 @@
     </div>
     <div class="event-toast nothing" v-if="nothingFound">
       {{ $t('subtitles.nothing') }}
-      <a href="" @click.prevent="subtitlecat">{{ $t('subtitles.alternative') }}</a>
+      <a href="" @keydown.enter="subtitlecat" @click.prevent="subtitlecat">{{ $t('subtitles.alternative') }}</a>
     </div>
     <div class="actionsBar" v-if="subtitlesList.length">
       <ul class="left">

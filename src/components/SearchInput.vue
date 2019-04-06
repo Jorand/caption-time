@@ -7,7 +7,8 @@
       @keydown.enter="onEnter" />
       <i class="icon-search"></i>
       <button type="reset" name="reset" value="Reset" class="search-reset icon-cross"
-        @click.stop="reset">
+        @click.stop="reset"
+        @keydown.enter="reset">
       </button>
     </form>
   </div>

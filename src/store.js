@@ -24,6 +24,9 @@ export default new Vuex.Store({
         password: '',
         port: ''
       }
+    },
+    data: {
+      butterIsConnected: false
     }
   },
   getters: {
@@ -61,6 +64,10 @@ export default new Vuex.Store({
     setAppLanguage: (state, lang) => {
       state.userSettings.appLanguage = lang
       console.log('[INFO] APP Language saved: ', lang)
+    },
+    setButterIsConnected: (state, value) => {
+      state.data.butterIsConnected = value
+      // console.log('[INFO] Butter is connected: ', value)
     }
   },
   actions: {

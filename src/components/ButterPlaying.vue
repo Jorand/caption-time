@@ -2,7 +2,7 @@
   <div tabindex="0" class="butter-remote"
     :class="{active: isActive}"
     @click.stop="toggle"
-    @keydown.enter.prevent="toggle"
+    @keydown.enter="enter"
     v-if="butterCurrentShow.title">
     <span class="player">Popcorn-Time Player</span>
     <p class="show-title">
@@ -41,6 +41,12 @@ export default {
     }
   },
   methods: {
+    enter (event) {
+      if (!this.isActive) {
+        if (event) event.stopPropagation()
+        this.toggle()
+      }
+    },
     toggle (event) {
       if (event) event.stopPropagation()
       this.isActive = !this.isActive
@@ -52,13 +58,18 @@ export default {
     }
   },
   computed: {},
-  created () {
+  mounted () {
     Butter = new ButterRemote(this.$store.state.userSettings.butter)
 
     Butter.connect()
 
+    Butter.subscribe('connected', data => {
+      this.$store.commit('setButterIsConnected', true)
+    })
+
     Butter.subscribe('disconnected', data => {
       this.butterCurrentShow = {}
+      this.$store.commit('setButterIsConnected', false)
     })
 
     Butter.subscribe('playingtitle', data => {
