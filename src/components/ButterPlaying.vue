@@ -15,8 +15,8 @@
       </a>
       <span class="details"
         v-if="butterCurrentShow.isShow">
-        Season {{ butterCurrentShow.tnp.season }} -
-        Episode {{ butterCurrentShow.tnp.episode }}
+        {{ $t('season') }} {{ butterCurrentShow.tnp.season }} -
+        {{ $t('episode') }} {{ butterCurrentShow.tnp.episode }}
       </span>
     </p>
     <button class="close"
@@ -37,8 +37,7 @@ export default {
     return {
       isActive: true,
       butterCurrentShow: {},
-      butterLastShow: {},
-      butterInterval: null
+      butterLastShow: {}
     }
   },
   methods: {
@@ -89,7 +88,7 @@ export default {
     }
   },
   destroy () {
-    clearInterval(this.butterInterval)
+    Butter.disconnect()
   }
 }
 </script>

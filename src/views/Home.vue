@@ -11,7 +11,7 @@
     @dragover.prevent="dragOverHandler"
     @dragleave.prevent="dragOverHandler">
     <ButterPlaying
-      v-if="butterRemoteIsEnable"
+      v-if="butterIsEnable"
       v-on:title-playing="searchFromButter"
       v-bind:updateButterSettings="newButterSettings" />
     <SearchInput
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 import SearchInput from '@/components/SearchInput.vue'
 import Subtitles from '@/components/Subtitles.vue'
 import ButterPlaying from '@/components/ButterPlaying.vue'
@@ -146,9 +146,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'butterRemoteIsEnable'
-    ])
+    ...mapState({
+      butterIsEnable: state => state.userSettings.butter.enable
+    })
   }
 }
 </script>

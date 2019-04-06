@@ -1,8 +1,8 @@
 <template>
   <div class="search">
     <form @submit="searchSubtitles" class="search-form">
-      <input autofocus type="text" placeholder="Enter show or movie name…"
-      name="search-input" class="search-input" ref="searchInput"
+      <input autofocus type="text" name="search-input" class="search-input" ref="searchInput"
+      v-bind:placeholder="$t('search.placeholder')"
       v-model="query"
       @keydown.enter="onEnter" />
       <i class="icon-search"></i>
@@ -63,7 +63,7 @@ export default {
       if (!Network.isOnline(this.searchSubtitles)) return
 
       // Use language in query or stored user setting language
-      var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.language
+      var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.subLanguage
 
       console.log('[INFO] searchByQuery:', this.query)
       this.startLoader()
@@ -188,7 +188,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       // console.log(mutation, state)
       switch (mutation.type) {
-        case 'setUserLanguage':
+        case 'setSubLanguage':
           this.searchSubtitles()
           break
       }

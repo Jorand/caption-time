@@ -1,6 +1,6 @@
 <template>
   <footer class="footer-bar">
-    <span class="app-version">v{{ appVersion }}</span>
+    <!-- <span class="app-version">v{{ appVersion }}</span> -->
   </footer>
 </template>
 

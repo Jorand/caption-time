@@ -14,14 +14,14 @@ new Vue({
   mounted () {
     // Prevent blank screen in Electron builds
     this.$router.push('/')
-    // Init UI lang
-    var userLang = this.$store.getters.uiLanguage
-    if (userLang) {
-      this.$i18n.locale = userLang
-      console.log('[INFO] UI Language (User): ', userLang)
+    // Init APP lang
+    var appLang = this.$store.state.userSettings.appLanguage
+    if (appLang) {
+      this.$i18n.locale = appLang
+      console.log('[INFO] APP Language (User): ', appLang)
     } else if (navigator.language in this.$i18n.messages) {
       this.$i18n.locale = navigator.language
-      console.log('[INFO] UI Language (navigator): ', navigator.language)
+      console.log('[INFO] APP Language (navigator): ', navigator.language)
     }
   }
 }).$mount('#app')

@@ -4,18 +4,20 @@
       <router-link class="sub-nav-back"
         to="/home"
         title="Go back page"></router-link>
-        <h1>{{ $t('settingsPageTitle') }}</h1>
+        <h1>{{ $t('settings.title') }}</h1>
     </div>
     <div class="content-scroll">
       <ol class="settings-list">
+
         <li class="settings-item">
           <div class="left">
-            <label for="">Language</label>
-            <small>Ui language</small>
+            <label for="settings_ui_lang">{{ $t('settings.language_label') }}</label>
+            <small>{{ $t('settings.language_detail') }}</small>
           </div>
           <div class="right">
-            <select id="language" class="input-select"
-              v-model="$i18n.locale" @change="changeLang($event.target.value)">
+            <select id="settings_ui_lang" class="input-select"
+              v-model="$i18n.locale"
+              @change="setAppLanguage($event.target.value)">
               <option v-for="(lang, i) in languages"
                 :key="`Lang${i}`"
                 :value="lang.language">
@@ -24,89 +26,131 @@
             </select>
           </div>
         </li>
+
         <li class="settings-item">
           <div class="left">
-            <label for="">Allow analytics</label>
-            <small>Help improve by sending anonymous stats</small>
+            <label for="enable-analytics">{{ $t('settings.analytics_label') }}</label>
+            <small>{{ $t('settings.analytics_detail') }}</small>
           </div>
           <div class="right">
             <div class="toggle">
-              <input id="switch-pop-enable" class="toggle-input" type="checkbox">
-              <label class="toggle-switch" for="switch-pop-enable"></label>
+              <input id="enable-analytics" class="toggle-input" type="checkbox"
+                v-model="analytics">
             </div>
           </div>
         </li>
+
         <li class="settings-item">
           <div class="left">
-            <label for="switch-pop-enable">Enable Popcorn-Time</label>
-            <small>Automatically get title watching</small>
+            <label for="enable-butter">{{ $t('settings.butter_label') }}</label>
+            <small>{{ $t('settings.butter_detail') }}</small>
           </div>
           <div class="right">
             <div class="toggle">
-              <input id="switch-pop-enable" class="toggle-input" type="checkbox">
-              <label class="toggle-switch" for="switch-pop-enable"></label>
+              <input id="enable-butter" class="toggle-input" type="checkbox"
+                v-model="butterIsEnable">
             </div>
           </div>
           <ol class="settings-sublist">
             <li class="settings-item">
-              <label for="">Adresse IP</label>
-              <input class="input-text" type="text" name="" value="127.0.0.1">
+              <label for="butter-ip">{{ $t('settings.ip_label') }}</label>
+              <input id="butter-ip" class="input-text" type="text" name=""
+                placeholder="127.0.0.1"
+                :value="butter.ip"
+                @change="setButterIp($event.target.value)">
             </li>
             <li class="settings-item">
-              <label for="">Port HTTP</label>
-              <input class="input-text" type="text" name="" value="8080">
+              <label for="butter-port">{{ $t('settings.port_label') }}</label>
+              <input id="butter-port" class="input-text" type="text" name=""
+                placeholder="8080"
+                :value="butter.port"
+                @change="setButterPort($event.target.value)">
             </li>
             <li class="settings-item">
-              <label for="">Username</label>
-              <input class="input-text" type="text" name="" value="popcorn">
+              <label for="butter-username">{{ $t('settings.username_label') }}</label>
+              <input id="butter-username" class="input-text" type="text" name=""
+                placeholder="popcorn"
+                :value="butter.username"
+                @change="setButterUsername($event.target.value)">
             </li>
             <li class="settings-item">
-              <label for="">Password</label>
-              <input class="input-text" type="text" name="" value="popcorn">
+              <label for="butter-password">{{ $t('settings.password_label') }}</label>
+              <input id="butter-password" class="input-text" type="text" name=""
+                placeholder="popcorn"
+                :value="butter.password"
+                @change="setButterPassword($event.target.value)">
             </li>
           </ol>
         </li>
+
         <li class="settings-item">
           <div class="left">
-            <label>Caption Time</label>
-            <small>Version 1.0.1</small>
+            <label>{{appName}}</label>
+            <small>Version {{appVersion}}</small>
           </div>
         </li>
+
       </ol>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
+import electron from 'electron'
 
 export default {
   name: 'Settings',
   data () {
     return {
+      appName: electron.remote.app.getName(),
+      appVersion: electron.remote.app.getVersion(),
       languages: [
         { language: 'en', title: 'English' },
         { language: 'fr', title: 'Français' }
-      ],
-      butterIsActive: false
+      ]
     }
   },
   methods: {
-    changeLang (value) {
-      this.$store.commit('setUILanguage', value)
+    setAppLanguage (value) {
+      this.$store.commit('setAppLanguage', value)
     },
-    updateSubtitles (subtitles) {
-
+    setButterIp (value) {
+      this.$store.commit('setButterIp', value)
+    },
+    setButterPort (value) {
+      this.$store.commit('setButterPort', value)
+    },
+    setButterUsername (value) {
+      this.$store.commit('setButterUsername', value)
+    },
+    setButterPassword (value) {
+      this.$store.commit('setButterPassword', value)
     }
   },
   mounted () {
-    this.selectedValue = this.userLanguageCode
+
   },
   computed: {
-    ...mapGetters([
-      'butterRemoteIsEnable',
-      'butterRemoteSettings'
-    ])
+    ...mapState({
+      butter: state => state.userSettings.butter
+    }),
+    analytics: {
+      get () {
+        return this.$store.state.userSettings.analytics
+      },
+      set (value) {
+        this.$store.commit('setAnalytics', value)
+      }
+    },
+    butterIsEnable: {
+      get () {
+        return this.$store.state.userSettings.butter.enable
+      },
+      set (value) {
+        this.$store.commit('setButterEnable', value)
+      }
+    }
   }
 }
 </script>
@@ -115,6 +159,7 @@ export default {
   .sub-nav-bar {
     text-align: left;
     border-bottom: 1px solid $lightgrey-color;
+    user-select: none;
 
     h1 {
       font-size: 26px;
@@ -130,17 +175,21 @@ export default {
       vertical-align: middle;
       padding: 15px 15px 15px 25px;
       margin-top: -5px;
+      color: $darkgrey-color;
 
       &::after {
         content: '';
         display: block;
         width: 11px;
         height: 11px;
-        border-color: $darkgrey-color;
         border-style: solid;
         border-width: 2px 0px 0px 2px;
 
         transform: rotate(-45deg);
+      }
+
+      &:focus {
+        color: $black-color;
       }
     }
   }
@@ -201,6 +250,10 @@ export default {
         font-size: 13px;
         color: $darkgrey-color;
         padding: 5px 0;
+      }
+
+      .input-select {
+        font-size: 14px;
       }
     }
 

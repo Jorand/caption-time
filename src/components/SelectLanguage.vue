@@ -1,14 +1,14 @@
 <template>
   <div class="select-container">
-      <select id="subtitleLanguage" class="input-select"
-        :value="language" @change="setUserLanguage($event.target.value)">
+      <select id="sub-language" class="input-select"
+        :value="subLanguage" @change="setSubLanguage($event.target.value)">
         <option v-for="lang in languages"
           :key="lang.code"
           :value="lang.code">
           {{ lang.name }}
         </option>
       </select>
-      <label for="subtitleLanguage" class="user-language">{{ userLanguageName }}</label>
+      <label for="sub-language" class="sub-language">{{ getSubLanguage.name }}</label>
   </div>
 </template>
 
@@ -24,18 +24,20 @@ export default {
       selectedValue: ''
     }
   },
-  mounted () {},
+  mounted () {
+
+  },
   methods: {
-    setUserLanguage (val) {
-      this.$store.commit('setUserLanguage', val)
+    setSubLanguage (value) {
+      this.$store.commit('setSubLanguage', value)
     }
   },
   computed: {
     ...mapState({
-      language: state => state.userSettings.language
+      subLanguage: state => state.userSettings.subLanguage
     }),
     ...mapGetters([
-      'userLanguageName'
+      'getSubLanguage'
     ])
   },
   watch: {}
@@ -52,7 +54,7 @@ export default {
     white-space: nowrap;
     margin-right: 10px;
 
-    .user-language {
+    .sub-language {
       display: inline-block;
       border: none;
       -webkit-appearance: none;
