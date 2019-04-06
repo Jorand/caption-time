@@ -52,7 +52,7 @@ export default {
     }
   },
   computed: {},
-  mounted () {
+  created () {
     Butter = new ButterRemote(this.$store.state.userSettings.butter)
 
     Butter.connect()
@@ -87,7 +87,7 @@ export default {
       Butter.updateSettings(newVal)
     }
   },
-  destroy () {
+  destroyed () {
     Butter.disconnect()
   }
 }

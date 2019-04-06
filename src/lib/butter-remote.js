@@ -8,6 +8,8 @@ const defaultConfig = {
   port: '8008'
 }
 
+let butterInterval = null
+
 export default function ({
   username = defaultConfig.username,
   password = defaultConfig.password,
@@ -17,7 +19,6 @@ export default function ({
 } = {}) {
   let isConnected = false
   let topics = {}
-  let butterInterval = null
   let lastTitle = ''
 
   this.pad = (n) => {
