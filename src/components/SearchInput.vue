@@ -18,10 +18,7 @@
 import Caption from 'caption-core'
 import Languages from '@/lib/languages'
 import Network from '@/lib/network'
-const electron = require('electron')
-const remote = electron.remote
-const mainWindow = remote.getCurrentWindow()
-const { dialog } = remote
+
 // Number of subtitles returned.
 // Option: int|"all"|"best"
 const LIMIT = 10
@@ -140,29 +137,6 @@ export default {
       } else if (this.query !== this.lastQuery) {
         this.searchSubtitles()
       }
-    },
-    openFile (file) {
-      // console.log(file)
-      if (!mainWindow) return
-      var opts = {
-        title: 'Select a file.',
-        filters: [{ name: 'Movie File', extensions: ['mkv', 'avi', 'mp4'] }],
-        properties: [ 'openFile' ]
-      }
-      dialog.showOpenDialog(mainWindow, opts, (selectedPaths) => {
-        console.log(selectedPaths)
-        if (selectedPaths) {
-          var fileName = selectedPaths[0].replace(/^.*[\\\/]/, '')
-          console.log(fileName)
-          this.query = fileName
-          this.searchSubtitles()
-          this.$emit('search-file', fileName)
-        }
-        // if (!Array.isArray(selectedPaths)) return
-        // selectedPaths.forEach(function (selectedPath) {
-        //
-        // })
-      })
     }
   },
   computed: {},
@@ -188,11 +162,6 @@ export default {
     }
   },
   mounted () {
-    electron.ipcRenderer.on('openFile', (event, file) => {
-      console.log('openFile', file)
-      this.openFile(file)
-    })
-
     this.$store.subscribe((mutation, state) => {
       // console.log(mutation, state)
       switch (mutation.type) {

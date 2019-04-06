@@ -18,7 +18,6 @@
       v-on:search-result="updateSubtitles"
       v-on:search-loading="searchIsLoading"
       v-on:search-nothing-found="searchNothingFound"
-      v-on:search-file="searchFile"
       v-bind:remoteQuery="externalQuery" />
     <div class="flex-content home-content">
       <Subtitles
@@ -33,9 +32,14 @@
 
 <script>
 import { mapState } from 'vuex'
+import tnp from 'torrent-name-parser'
 import SearchInput from '@/components/SearchInput.vue'
 import Subtitles from '@/components/Subtitles.vue'
 import ButterPlaying from '@/components/ButterPlaying.vue'
+const electron = require('electron')
+const remote = electron.remote
+const mainWindow = remote.getCurrentWindow()
+const { dialog } = remote
 
 export default {
   name: 'Home',
@@ -104,9 +108,6 @@ export default {
       event.preventDefault()
       this.dragover = event.type === 'dragover'
     },
-    searchFile (value) {
-      this.butterClose = value
-    },
     loadFiles (event) {
       console.log('File(s) dropped')
       event.preventDefault()
@@ -136,9 +137,7 @@ export default {
         }
       }
       console.log(this.filePaths[0].filename)
-      this.externalQuery = this.filePaths[0].filename
-      this.butterClose = Date.now()
-
+      this.searchFile(this.filePaths[0].filename)
       this.filePaths = []
       // var LANG = this.$store.state.userSettings.language
       // console.log(this.filePaths, LANG)
@@ -150,11 +149,51 @@ export default {
       //   console.log(subtitles)
       //   this.updateSubtitles(subtitles)
       // })
+    },
+    openFile (file) {
+      // console.log(file)
+      if (!mainWindow) return
+      var opts = {
+        title: 'Select a file.',
+        filters: [{ name: 'Movie File', extensions: ['mkv', 'avi', 'mp4'] }],
+        properties: [ 'openFile' ]
+      }
+      dialog.showOpenDialog(mainWindow, opts, (selectedPaths) => {
+        console.log(selectedPaths)
+        if (selectedPaths) {
+          var fileName = selectedPaths[0].replace(/^.*[\\/]/, '')
+          console.log(fileName)
+          this.searchFile(fileName)
+        }
+        // if (!Array.isArray(selectedPaths)) return
+        // selectedPaths.forEach(function (selectedPath) {
+        //
+        // })
+      })
+    },
+    searchFile (fileName) {
+      var show = tnp(fileName)
+      var q = show.title
+      if (show.season && show.episode) {
+        q += ' S' + this.pad(show.season) + ' E' + this.pad(show.episode) + (show.quality ? ' ' + show.quality : '')
+      }
+      this.externalQuery = q
+      this.butterClose = Date.now()
+    },
+    pad (n) {
+      return (n < 10) ? ('0' + n) : n
     }
   },
   computed: {
     ...mapState({
       butterIsEnable: state => state.userSettings.butter.enable
+    })
+  },
+  mounted () {
+    electron.ipcRenderer.removeAllListeners('openFile')
+    electron.ipcRenderer.on('openFile', (event, file) => {
+      console.log('openFile', file)
+      this.openFile(file)
     })
   }
 }
