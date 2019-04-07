@@ -48,7 +48,12 @@ export default {
         match = match[0].toLowerCase().replace('/', '') // Remove /
         var language = Languages.find(l => l.name.toLowerCase() === match) || Languages.find(l => l.code === match)
         console.log('[INFO] Query match language:', match, language.name)
-        return language.code
+        return {
+          lang: language.code,
+          query: q.replace(`/${match}`, '')
+        }
+      } else {
+        return false
       }
     },
     updateSubtitles (subtitles) {
@@ -61,13 +66,15 @@ export default {
       if (!Network.isOnline(this.searchSubtitles)) return
 
       // Use language in query or stored user setting language
-      var LANG = this.searchLangInQuery(this.query) || this.$store.state.userSettings.subLanguage
+      var result = this.searchLangInQuery(this.query)
+      var query = result.query || this.query
+      var LANG = result.lang || this.$store.state.userSettings.subLanguage
 
-      console.log('[INFO] searchByQuery:', this.query)
+      console.log('[INFO] searchByQuery:', query)
       this.startLoader()
       this.tempSearchResult = []
       this.searchResult = []
-      this.lastQuery = this.query
+      this.lastQuery = query
       this.nothingFound = false
 
       const pushSubtitles = (subtitles, source) => {
@@ -99,7 +106,7 @@ export default {
         this.endLoader()
       }, 10000)
 
-      Caption.searchByQuery(this.query, LANG, LIMIT)
+      Caption.searchByQuery(query, LANG, LIMIT)
         // All sources are checked.
         .on('fastest', subtitles => {
           // Fastest source has been checked.
