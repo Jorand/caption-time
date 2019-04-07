@@ -36,6 +36,7 @@ import tnp from 'torrent-name-parser'
 import SearchInput from '@/components/SearchInput.vue'
 import Subtitles from '@/components/Subtitles.vue'
 import ButterPlaying from '@/components/ButterPlaying.vue'
+import { pad } from '@/lib/butter-remote'
 const electron = require('electron')
 const remote = electron.remote
 const mainWindow = remote.getCurrentWindow()
@@ -175,13 +176,10 @@ export default {
       var show = tnp(fileName)
       var q = show.title
       if (show.season && show.episode) {
-        q += ' S' + this.pad(show.season) + ' E' + this.pad(show.episode) + (show.quality ? ' ' + show.quality : '')
+        q += ' S' + pad(show.season) + ' E' + pad(show.episode) + (show.quality ? ' ' + show.quality : '')
       }
       this.externalQuery = q
       this.butterClose = Date.now()
-    },
-    pad (n) {
-      return (n < 10) ? ('0' + n) : n
     }
   },
   computed: {

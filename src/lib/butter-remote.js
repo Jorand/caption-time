@@ -21,9 +21,7 @@ export default function ({
   let topics = {}
   let lastTitle = ''
 
-  this.pad = (n) => {
-    return (n < 10) ? ('0' + n) : n
-  }
+  this.pad = pad
 
   this.disconnect = () => {
     clearInterval(butterInterval)
@@ -246,4 +244,8 @@ export default function ({
       listener(data || {})
     })
   }
+}
+
+export function pad (n) {
+  return (n < 10) ? ('0' + n) : n
 }
