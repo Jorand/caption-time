@@ -85,7 +85,7 @@
 
         <li class="settings-item">
           <div class="left">
-            <label>{{appName}}</label>
+            <label @click="openLink(appReleases)">{{appName}}</label>
             <small>Version {{appVersion}}</small>
           </div>
         </li>
@@ -97,14 +97,16 @@
 
 <script>
 import { mapState } from 'vuex'
-import electron from 'electron'
+import { remote, shell } from 'electron'
+const packageJson = require('../../package.json')
 
 export default {
   name: 'Settings',
   data () {
     return {
-      appName: electron.remote.app.getName(),
-      appVersion: electron.remote.app.getVersion(),
+      appName: remote.app.getName(),
+      appVersion: remote.app.getVersion(),
+      appReleases: packageJson.repository.url + '/releases/',
       languages: [
         { language: 'en', title: 'English' },
         { language: 'fr', title: 'Français' }
@@ -126,6 +128,9 @@ export default {
     },
     setButterPassword (value) {
       this.$store.commit('setButterPassword', value)
+    },
+    openLink (link) {
+      shell.openExternal(link)
     }
   },
   mounted () {
