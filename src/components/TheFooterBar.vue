@@ -2,7 +2,7 @@
   <footer class="footer-bar">
     <!-- <span class="app-version">v{{ appVersion }}</span> -->
     <span class="butter-status"
-      v-if="butterIsEnable"
+      v-if="butterIsEnable && $route.name === 'home'"
       v-bind:class="{ 'connected': butterStatus }">
       Popcorn-Time
     </span>
