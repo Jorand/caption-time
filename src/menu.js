@@ -1,4 +1,4 @@
-const { app, Menu, shell } = require('electron')
+const { app, shell } = require('electron').remote
 const isDev = require('electron-is-dev')
 const packageJson = require('../package.json')
 const electron = require('electron')
@@ -154,5 +154,4 @@ if (process.platform === 'darwin') {
   // ]
 }
 
-const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
+module.exports = template

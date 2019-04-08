@@ -1,8 +1,12 @@
+import { remote } from 'electron'
+import fs from 'fs'
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import i18n from './i18n'
+
+const { Menu } = remote
 
 Vue.config.productionTip = process.env.NODE_ENV === 'production'
 
@@ -22,6 +26,28 @@ new Vue({
     } else if (navigator.language in this.$i18n.messages) {
       this.$i18n.locale = navigator.language
       console.log('[INFO] APP Language (navigator): ', navigator.language)
+    }
+    this.changeMenu(this.$i18n.locale)
+  },
+  methods: {
+    changeMenu (lang) {
+      console.log(lang)
+      var filePath = `./src/menu-${lang}.js`
+      console.log(filePath)
+      if (fs.existsSync(filePath)) {
+        var template = require('./' + `menu-${lang}`)
+        const menu = Menu.buildFromTemplate(template)
+        Menu.setApplicationMenu(menu)
+      } else {
+        var templateD = require('./menu')
+        const menu = Menu.buildFromTemplate(templateD)
+        Menu.setApplicationMenu(menu)
+      }
+    }
+  },
+  watch: {
+    '$i18n.locale': function (newVal, oldVal) {
+      this.changeMenu(newVal)
     }
   }
 }).$mount('#app')

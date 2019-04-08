@@ -1,7 +1,8 @@
 /* jshint node: true */
 'use strict'
 
-import { app, protocol, BrowserWindow, systemPreferences } from 'electron'
+import { app, protocol, BrowserWindow, systemPreferences, Menu } from 'electron'
+
 import {
   createProtocol,
   installVueDevtools
@@ -44,7 +45,9 @@ function createWindow () {
     app.quit()
   })
 
-  require('./menu')
+  // var template = require('./menu')
+  // const menu = Menu.buildFromTemplate(template)
+  // Menu.setApplicationMenu(menu)
 
   mainWindow.setProgressBar(-1)
   console.timeEnd('init')
