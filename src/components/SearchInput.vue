@@ -28,7 +28,7 @@ export default {
   props: ['remoteQuery'],
   data () {
     return {
-      query: 'supergirl S01E01',
+      query: '',
       lastQuery: '',
       isLoading: false,
       searchResult: [],

@@ -27,13 +27,11 @@ new Vue({
       this.$i18n.locale = navigator.language
       console.log('[INFO] APP Language (navigator): ', navigator.language)
     }
-    this.changeMenu(this.$i18n.locale)
+    this.updateAppMenu(this.$i18n.locale)
   },
   methods: {
-    changeMenu (lang) {
-      console.log(lang)
+    updateAppMenu (lang) {
       var filePath = `./src/menu-${lang}.js`
-      console.log(filePath)
       if (fs.existsSync(filePath)) {
         var template = require('./' + `menu-${lang}`)
         const menu = Menu.buildFromTemplate(template)
@@ -47,7 +45,7 @@ new Vue({
   },
   watch: {
     '$i18n.locale': function (newVal, oldVal) {
-      this.changeMenu(newVal)
+      this.updateAppMenu(newVal)
     }
   }
 }).$mount('#app')

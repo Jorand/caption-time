@@ -15,7 +15,7 @@
             @click="filterSubtitles('all')"
             @keydown.enter="filterSubtitles('all')"
             @focus="actionFocused = true"
-            @blur="actionFocused = false">{{ $t('subtitles.all') }}</button>
+            @blur="actionFocused = false">{{ $t('subtitles.all') }}{{ subtitlesList.length > 1 ? `(${subtitlesList.length})` : '' }}</button>
         </li>
         <li class="bar-item" v-bind:key="`source-${i}`"
           v-show="sources.length > 1"
