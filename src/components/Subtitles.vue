@@ -7,7 +7,7 @@
       {{ $t('subtitles.nothing') }}
       <a href="" @keydown.enter="subtitlecat" @click.prevent="subtitlecat">{{ $t('subtitles.alternative') }}</a>
     </div>
-    <div class="actionsBar" v-if="subtitlesList.length">
+    <div class="actionsBar" v-if="subtitles.length">
       <ul class="left">
         <li class="bar-item">
           <button type="button" name="show-all"
@@ -15,7 +15,7 @@
             @click="filterSubtitles('all')"
             @keydown.enter="filterSubtitles('all')"
             @focus="actionFocused = true"
-            @blur="actionFocused = false">{{ $t('subtitles.all') }}{{ subtitlesList.length > 1 ? `(${subtitlesList.length})` : '' }}</button>
+            @blur="actionFocused = false">{{ $t('subtitles.all') }}{{ subtitles.length > 1 ? `(${subtitles.length})` : '' }}</button>
         </li>
         <li class="bar-item" v-bind:key="`source-${i}`"
           v-show="sources.length > 1"
