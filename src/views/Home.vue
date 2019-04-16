@@ -176,7 +176,7 @@ export default {
       var show = tnp(fileName)
       var q = show.title
       if (show.season && show.episode) {
-        q += ' S' + pad(show.season) + ' E' + pad(show.episode) + (show.quality ? ' ' + show.quality : '')
+        q += ' S' + pad(show.season) + ' E' + pad(show.episode)
       }
       this.externalQuery = q
       this.butterClose = Date.now()
