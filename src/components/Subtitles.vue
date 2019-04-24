@@ -120,6 +120,7 @@ export default {
       const hasExtension = subtitle.name.includes('.srt')
       let filename = hasExtension ? subtitle.name.replace(/.srt$|.str$/gi, '') : subtitle.name
       filename = `${filename}-${subtitle.langName}.srt`
+      filename = filename.replace('/', '.')
       const savePath = dialog.showSaveDialog(mainWindow, {
         title: 'Download',
         properties: ['openDirectory'],
