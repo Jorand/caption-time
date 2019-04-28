@@ -46,7 +46,9 @@ npm run lint
 ```
 
 ## Todo
-
+- Multi file drop
+- Dark theme
+- App icon
 
 ## Resources
 
