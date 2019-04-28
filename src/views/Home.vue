@@ -164,8 +164,9 @@ export default {
         properties: [ 'openFile' ]
       }
       dialog.showOpenDialog(mainWindow, opts, (selectedPaths) => {
-        console.log(selectedPaths)
         if (selectedPaths) {
+          console.log(selectedPaths)
+          // TODO: Handle multi file load
           var fileName = selectedPaths[0].replace(/^.*[\\/]/, '')
           console.log(fileName)
           this.searchFile(fileName)
@@ -197,7 +198,7 @@ export default {
   mounted () {
     electron.ipcRenderer.removeAllListeners('openFile')
     electron.ipcRenderer.on('openFile', (event, file) => {
-      console.log('openFile', file)
+      console.log('[INFO] Action: openFile')
       this.openFile(file)
     })
   }
