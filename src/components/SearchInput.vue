@@ -100,7 +100,7 @@ export default {
 
         if (source === 'completed') {
           this.endLoader()
-          mainWindow.webContents.send('logQuery', query, from, this.tempSearchResult.length);
+          mainWindow.webContents.send('logQuery', query, from, this.tempSearchResult.length)
         }
       }
 
