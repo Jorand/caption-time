@@ -30,8 +30,21 @@ export default {
   },
   mounted () {
     electron.ipcRenderer.on('openUserSettings', (event, message) => {
-      console.log('openUserSettings', message)
       this.$router.push('settings')
+    })
+
+    // TRAKING
+    electron.ipcRenderer.on('donateClick', (event, message) => {
+      console.log('[GA] Donate')
+      this.$ga.event('interaction', 'Donate button clicked')
+    })
+    electron.ipcRenderer.on('openAbout', (event, message) => {
+      console.log('[GA] About')
+      this.$ga.event('interaction', 'About window opened')
+    })
+    electron.ipcRenderer.on('logQuery', (event, query) => {
+      console.log(`[GA] Query: Searched for ${query}`)
+      this.$ga.event('search', query, `Searched for ${query}`)
     })
   }
 }

@@ -18,6 +18,8 @@
 import Caption from 'caption-core'
 import Languages from '@/lib/languages'
 import Network from '@/lib/network'
+import { remote } from 'electron'
+const mainWindow = remote.getCurrentWindow()
 
 // Number of subtitles returned.
 // Option: int|"all"|"best"
@@ -118,6 +120,7 @@ export default {
           // setTimeout(() => {
           pushSubtitles(subtitles, 'completed')
           // }, 5000)
+          mainWindow.webContents.send('logQuery', query);
         })
     },
     reset () {

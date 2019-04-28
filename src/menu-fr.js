@@ -1,7 +1,7 @@
-const { app, shell } = require('electron').remote
+const electron = require('electron')
+const { app, shell } = electron.remote
 const isDev = require('electron-is-dev')
 const packageJson = require('../package.json')
-const electron = require('electron')
 
 const template = [
   {
@@ -11,13 +11,9 @@ const template = [
         label: 'Ouvrir le fichier...',
         accelerator: 'CmdOrCtrl+O',
         click: (menuItem, browserWindow, event) => {
-          if (browserWindow) {
-            browserWindow.webContents.send('openFile', '')
-          } else {
-            var focusedWindow = electron.BrowserWindow.getFocusedWindow()
-            focusedWindow.show()
-            focusedWindow.webContents.send('openFile', '')
-          }
+          var focusedWindow = browserWindow || electron.remote.BrowserWindow.getFocusedWindow()
+          focusedWindow.show()
+          focusedWindow.webContents.send('openFile')
         }
       }
     ]
@@ -80,9 +76,13 @@ const template = [
     submenu: [
       {
         label: 'Faire un don',
-        click: () => {
-          shell.openExternal('https://www.paypal.me/jorandlepape')
+        click: (menuItem, browserWindow, event) => {
           // analytics Donated
+          var focusedWindow = browserWindow || electron.remote.BrowserWindow.getFocusedWindow()
+          focusedWindow.show()
+          focusedWindow.webContents.send('donateClick')
+
+          shell.openExternal('https://www.paypal.me/jorandlepape')
         }
       },
       {
@@ -106,15 +106,23 @@ if (process.platform === 'darwin') {
   template.unshift({
     label: app.getName(),
     submenu: [
-      { role: 'about', label: 'À propos de ' + app.getName() },
+      {
+        role: 'about',
+        label: 'À propos de ' + app.getName(),
+        click: (menuItem, browserWindow, event) => {
+          var focusedWindow = browserWindow || electron.remote.BrowserWindow.getFocusedWindow()
+          focusedWindow.show()
+          focusedWindow.webContents.send('openAbout')
+        }
+      },
       { type: 'separator' },
       {
         label: 'Préférences...',
         accelerator: 'CmdOrCtrl+,',
         click: (menuItem, browserWindow, event) => {
-          var focusedWindow = browserWindow || electron.BrowserWindow.getFocusedWindow()
+          var focusedWindow = browserWindow || electron.remote.BrowserWindow.getFocusedWindow()
           focusedWindow.show()
-          focusedWindow.webContents.send('openUserSettings', '')
+          focusedWindow.webContents.send('openUserSettings')
         }
       },
       { type: 'separator' },

@@ -16,7 +16,7 @@ export default new Vuex.Store({
     userSettings: {
       appLanguage: '',
       subLanguage: 'eng',
-      analytics: false,
+      analytics: true,
       butter: {
         enable: true,
         ip: '',
