@@ -49,6 +49,7 @@ npm run lint
 - Multi file drop
 - Dark theme
 - App icon
+- file drop: VLC auto name match dropped file
 
 ## Resources
 

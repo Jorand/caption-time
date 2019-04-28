@@ -161,17 +161,20 @@ export default {
     downloadAll () {
       if (this.subtitlesList.length < 1) return
       if (!Network.isOnline(this.downloadAll)) return
+
       let saveFolder = dialog.showOpenDialog(mainWindow, {
         title: 'Download',
         properties: ['openDirectory']
       })
+
       if (!saveFolder) return
+
       saveFolder = saveFolder[0]
       this.isLoading = true
       mainWindow.setProgressBar(0)
       let counter = 0
       const endDownload = (force = false, filePath = '') => {
-        var p = map(counter + 1, 0, this.subtitlesList.length - 1, 0, 1)
+        var p = map(counter + 1, 0, this.subtitlesList.length, 0, 1)
         mainWindow.setProgressBar(p)
         if (counter >= this.subtitlesList.length - 1 || force) {
           clearTimeout(timeoutDownload)
@@ -197,7 +200,9 @@ export default {
           var savePath = `${saveFolder}/${filename}`
           Caption.download(subtitle, subtitle.source, savePath)
             .then(() => {
+              // setTimeout(() => {
               endDownload(false, savePath)
+              // }, 5000)
             })
             .catch(err => {
               // console.log('[ERROR] download:', err)
