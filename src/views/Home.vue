@@ -52,7 +52,7 @@ export default {
   data () {
     return {
       subtitlesList: [],
-      externalQuery: '',
+      externalQuery: {},
       arrowNavPosition: -1,
       arrowNavEnter: 0,
       search_isLoading: false,
@@ -68,10 +68,13 @@ export default {
       // this.subtitles = [...this.subtitles, result];
       this.arrowNavPosition = -1
       this.subtitlesList = subtitles
-      this.externalQuery = ''
+      this.externalQuery = {}
     },
     searchFromButter (title) {
-      this.externalQuery = title
+      this.externalQuery = {
+        query: title,
+        source: 'butter'
+      }
     },
     focus (event) {
       if (this.arrowNavPosition < 0) {
@@ -138,6 +141,7 @@ export default {
         }
       }
       console.log(this.filePaths[0].filename)
+      // TODO: Handle multifile drop
       this.searchFile(this.filePaths[0].filename)
       this.filePaths = []
       // var LANG = this.$store.state.userSettings.language
@@ -178,7 +182,10 @@ export default {
       if (show.season && show.episode) {
         q += ' S' + pad(show.season) + ' E' + pad(show.episode)
       }
-      this.externalQuery = q
+      this.externalQuery = {
+        query: q,
+        source: 'file'
+      }
       this.butterClose = Date.now()
     }
   },

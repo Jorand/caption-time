@@ -61,7 +61,7 @@ export default {
     updateSubtitles (subtitles) {
       this.$emit('search-result', subtitles)
     },
-    searchSubtitles (event) {
+    searchSubtitles (event, from = 'query') {
       if (event) event.preventDefault() // Prevent form submit
       if (!this.query) return // Do nothing empty query
 
@@ -100,6 +100,7 @@ export default {
 
         if (source === 'completed') {
           this.endLoader()
+          mainWindow.webContents.send('logQuery', query, from, this.tempSearchResult.length);
         }
       }
 
@@ -120,7 +121,6 @@ export default {
           // setTimeout(() => {
           pushSubtitles(subtitles, 'completed')
           // }, 5000)
-          mainWindow.webContents.send('logQuery', query);
         })
     },
     reset () {
@@ -164,10 +164,12 @@ export default {
       this.updateSubtitles(this.searchResult)
     },
     remoteQuery: function (newVal, oldVal) { // watch it
-      console.log('[WATCH] Remote query:', newVal, '| was:', oldVal)
-      if (newVal && newVal !== this.query) {
-        this.query = newVal
-        this.searchSubtitles()
+      // console.log('[WATCH] Remote query:', newVal.query, '| was:', oldVal.query)
+      var newQuery = newVal.query
+      if (newQuery && newQuery !== this.query) {
+        console.log('[WATCH] Remote query:', newQuery)
+        this.query = newQuery
+        this.searchSubtitles(false, newVal.source || false)
       }
     }
   },

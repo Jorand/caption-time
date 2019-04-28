@@ -42,9 +42,9 @@ export default {
       console.log('[GA] About')
       this.$ga.event('interaction', 'About window opened')
     })
-    electron.ipcRenderer.on('logQuery', (event, query) => {
-      console.log(`[GA] Query: Searched for ${query}`)
-      this.$ga.event('search', query, `Searched for ${query}`)
+    electron.ipcRenderer.on('logQuery', (event, query, source, result) => {
+      console.log(`[GA] Query: Searched for ${query} by ${source} (${result} Results)`)
+      this.$ga.event('search', source, `Searched for ${query}`, result)
     })
   }
 }
